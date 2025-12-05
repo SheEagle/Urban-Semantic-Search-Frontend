@@ -1,122 +1,465 @@
+/*@import "tailwindcss";*/
+/*@import "tw-animate-css";*/
+
+/*@custom-variant dark (&:is(.dark *));*/
+
+/*@theme inline {*/
+/*    --color-background: var(--background);*/
+/*    --color-foreground: var(--foreground);*/
+/*    --font-serif: var(--font-libre);*/
+/*    --font-mono: var(--font-geist-mono);*/
+
+/*    !* 📜 核心古风调色板 *!*/
+/*    --color-paper: var(--paper);           !* 羊皮纸底色 *!*/
+/*    --color-ink: var(--ink);               !* 主墨水色 *!*/
+/*    --color-ink-faded: var(--ink-faded);   !* 淡墨迹 (副标题) *!*/
+/*    --color-wax-red: var(--wax-red);       !* 火漆红 (强调/错误) *!*/
+/*    --color-royal-gold: var(--royal-gold); !* 烫金 (高亮) *!*/
+/*    !* 映射 shadcn/ui 变量到我们的古风颜色 *!*/
+/*    --color-card: var(--card);*/
+/*    --color-card-foreground: var(--card-foreground);*/
+/*    --color-popover: var(--popover);*/
+/*    --color-popover-foreground: var(--popover-foreground);*/
+/*    --color-primary: var(--primary);*/
+/*    --color-primary-foreground: var(--primary-foreground);*/
+/*    --color-secondary: var(--secondary);*/
+/*    --color-secondary-foreground: var(--secondary-foreground);*/
+/*    --color-muted: var(--muted);*/
+/*    --color-muted-foreground: var(--muted-foreground);*/
+/*    --color-accent: var(--accent);*/
+/*    --color-accent-foreground: var(--accent-foreground);*/
+/*    --color-destructive: var(--destructive);*/
+/*    --color-destructive-foreground: var(--destructive-foreground);*/
+/*    --color-border: var(--border);*/
+/*    --color-input: var(--input);*/
+/*    --color-ring: var(--ring);*/
+
+/*    --radius-sm: calc(var(--radius) - 4px);*/
+/*    --radius-md: calc(var(--radius) - 2px);*/
+/*    --radius-lg: var(--radius);*/
+/*}*/
+
+/*:root {*/
+/*    !* 📜 材质定义 *!*/
+/*    --paper: oklch(0.94 0.03 85); !* 温暖的陈旧米色 *!*/
+/*    --ink: oklch(0.25 0.04 50); !* 深褐色墨水 *!*/
+/*    --ink-faded: oklch(0.55 0.04 50); !* 褪色墨水 *!*/
+/*    --wax-red: oklch(0.50 0.15 30); !* 复古火漆红 *!*/
+/*    --royal-gold: oklch(0.75 0.15 85); !* 古金色 *!*/
+
+/*    !* 基础变量映射 *!*/
+/*    --background: var(--paper);*/
+/*    --foreground: var(--ink);*/
+
+/*    --card: oklch(0.96 0.02 85);*/
+/*    --card-foreground: var(--ink);*/
+
+/*    --popover: var(--paper);*/
+/*    --popover-foreground: var(--ink);*/
+
+/*    --primary: var(--ink);*/
+/*    --primary-foreground: oklch(0.98 0.01 85);*/
+
+/*    --secondary: oklch(0.92 0.03 85);*/
+/*    --secondary-foreground: var(--ink);*/
+
+/*    --muted: oklch(0.90 0.03 85);*/
+/*    --muted-foreground: var(--ink-faded);*/
+
+/*    --accent: oklch(0.90 0.03 85);*/
+/*    --accent-foreground: var(--ink);*/
+
+/*    --destructive: var(--wax-red);*/
+/*    --destructive-foreground: oklch(0.98 0.01 85);*/
+
+/*    --border: oklch(0.85 0.04 85); !* 纸张边缘颜色 *!*/
+/*    --input: oklch(0.85 0.04 85);*/
+/*    --ring: var(--wax-red);*/
+
+/*    --radius: 0.5rem;*/
+/*}*/
+
+/*@layer base {*/
+/*    * {*/
+/*        @apply border-border outline-ring/50;*/
+/*    }*/
+
+/*    body {*/
+/*        @apply bg-background text-foreground;*/
+/*    }*/
+
+/*    !* 强制所有标题使用衬线体 *!*/
+/*    h1, h2, h3, h4, h5, h6 {*/
+/*        font-family: var(--font-serif), ui-serif, Georgia, serif;*/
+/*        font-weight: 700;*/
+/*        letter-spacing: -0.02em;*/
+/*    }*/
+/*}*/
+
+/*@layer utilities {*/
+/*    !* ✨ 羊皮纸纹理滤镜 *!*/
+/*    .bg-parchment {*/
+/*        background-color: var(--paper);*/
+/*        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");*/
+/*    }*/
+
+/*    !* 暖色投影 *!*/
+/*    .shadow-parchment {*/
+/*        box-shadow: 0 4px 20px -2px rgba(60, 40, 20, 0.15), 0 2px 8px -2px rgba(60, 40, 20, 0.1);*/
+/*    }*/
+
+/*    !* 墨水正片叠底效果 *!*/
+/*    .text-ink-blend {*/
+/*        color: var(--ink);*/
+/*        mix-blend-mode: multiply;*/
+/*    }*/
+/*}*/
+
+/*!* 🗺️ Leaflet 地图弹窗深度定制 - 让弹窗也变成羊皮纸风格 *!*/
+/*.leaflet-popup-content-wrapper, .leaflet-popup-tip {*/
+/*    background: var(--paper) !important;*/
+/*    border: 1px solid rgba(60, 40, 20, 0.2);*/
+/*    box-shadow: 0 4px 15px rgba(60, 40, 20, 0.3) !important;*/
+/*    border-radius: 4px !important;*/
+/*}*/
+
+/*.leaflet-popup-content {*/
+/*    font-family: var(--font-serif) !important;*/
+/*    color: var(--ink) !important;*/
+/*    margin: 10px !important;*/
+/*}*/
+
+/*.leaflet-container a.leaflet-popup-close-button {*/
+/*    color: var(--ink-faded) !important;*/
+/*}*/
+
+/*!* 修改 utilities 部分，确保背景颜色是实心的 *!*/
+/*@layer utilities {*/
+/*    .bg-parchment {*/
+/*        !* 强制背景色不透明 *!*/
+/*        background-color: var(--paper);*/
+/*        !* 纹理 *!*/
+/*        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");*/
+/*    }*/
+
+/*    !* 添加一个新的类，用于完全不透明的纸张背景，不带纹理，纯色 *!*/
+/*    .bg-paper {*/
+/*        background-color: var(--paper);*/
+/*    }*/
+
+/*    !* ✨ 新增：复古细滚动条 (Custom Thin Scrollbar) *!*/
+/*    .custom-scrollbar {*/
+/*        scrollbar-width: thin; !* Firefox *!*/
+/*        scrollbar-color: var(--ink-faded) transparent;*/
+/*    }*/
+
+/*    !* Webkit (Chrome, Safari, Edge) 定制 *!*/
+/*    .custom-scrollbar::-webkit-scrollbar {*/
+/*        width: 4px; !* 极细 *!*/
+/*        height: 4px; !* 水平滚动条也很细 *!*/
+/*    }*/
+
+/*    .custom-scrollbar::-webkit-scrollbar-track {*/
+/*        background: transparent; !* 轨道透明 *!*/
+/*    }*/
+
+/*    .custom-scrollbar::-webkit-scrollbar-thumb {*/
+/*        background-color: var(--ink-faded); !* 滚动条颜色：淡墨色 *!*/
+/*        border-radius: 4px; !* 圆角 *!*/
+/*        opacity: 0.5;*/
+/*    }*/
+
+/*    .custom-scrollbar::-webkit-scrollbar-thumb:hover {*/
+/*        background-color: var(--wax-red); !* 鼠标悬停变红，提示可拖动 *!*/
+/*    }*/
+/*}*/
+
+/*.vintage-map-tiles {*/
+/*    filter: sepia(0.3) contrast(0.9) brightness(1.05) saturate(0.8);*/
+/*}*/
+
+/*@import "tailwindcss";*/
+/*@import "tw-animate-css";*/
+
+/*@custom-variant dark (&:is(.dark *));*/
+
+/*@theme inline {*/
+/*    --color-background: var(--background);*/
+/*    --color-foreground: var(--foreground);*/
+/*    --font-serif: var(--font-libre);*/
+/*    --font-mono: var(--font-geist-mono);*/
+
+/*    !* 🌌 Time Atlas Palette (时空图谱色盘) *!*/
+/*    --color-atlas-paper: var(--atlas-paper);     !* 雾化底色 *!*/
+/*    --color-atlas-glass: var(--atlas-glass);     !* 玻璃层 *!*/
+/*    --color-deep-ocean: var(--deep-ocean);       !* 深邃蓝 (主文字) *!*/
+/*    --color-mist-blue: var(--mist-blue);         !* 迷雾蓝 (次要文字) *!*/
+/*    --color-time-gold: var(--time-gold);         !* 时光金 (高亮/强调) *!*/
+/*    --color-aether-teal: var(--aether-teal);     !* 乙太青 (科技感点缀) *!*/
+/*    !* 映射 Shadcn *!*/
+/*    --color-border: var(--border);*/
+/*    --color-input: var(--input);*/
+/*    --color-ring: var(--time-gold);*/
+/*    --radius-sm: 0.3rem;*/
+/*    --radius-md: 0.5rem;*/
+/*    --radius-lg: 0.8rem;*/
+/*}*/
+
+/*:root {*/
+/*    !* 🎨 核心变量：轻盈、通透、精密 *!*/
+/*    --atlas-paper: oklch(0.98 0.01 90); !* 极淡的灰白，像高档绘图纸 *!*/
+/*    --atlas-glass: rgba(255, 255, 255, 0.7); !* 半透明玻璃基底 *!*/
+/*    --deep-ocean: oklch(0.30 0.05 250); !* 深海蓝，比纯黑更有质感 *!*/
+/*    --mist-blue: oklch(0.65 0.05 240); !* 淡蓝灰，用于注释 *!*/
+/*    --time-gold: oklch(0.70 0.12 60); !* 玫瑰金/铜色，复古精密感 *!*/
+/*    --aether-teal: oklch(0.75 0.10 190); !* 有一点点发光的青色 *!*/
+
+/*    --background: var(--atlas-paper);*/
+/*    --foreground: var(--deep-ocean);*/
+
+/*    !* UI 边框非常淡，像铅笔痕迹 *!*/
+/*    --border: oklch(0.90 0.02 250);*/
+/*    --input: rgba(255, 255, 255, 0.5);*/
+
+/*    --radius: 0.5rem;*/
+/*}*/
+
+/*@layer base {*/
+/*    * {*/
+/*        @apply border-border outline-ring/50;*/
+/*    }*/
+
+/*    body {*/
+/*        @apply bg-background text-foreground;*/
+/*        !* 背景：不再是纹理，而是一个极淡的径向渐变，模拟光照 *!*/
+/*        background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #f3f4f6 100%);*/
+/*    }*/
+/*}*/
+
+/*@layer utilities {*/
+/*    !* ✨ 核心：以太玻璃风格 (Glassmorphism) *!*/
+/*    .bg-glass {*/
+/*        background-color: var(--atlas-glass);*/
+/*        backdrop-filter: blur(12px) saturate(180%);*/
+/*        -webkit-backdrop-filter: blur(12px) saturate(180%);*/
+/*        border: 1px solid rgba(255, 255, 255, 0.8);*/
+/*        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),*/
+/*        0 2px 4px -1px rgba(0, 0, 0, 0.03),*/
+/*        inset 0 0 20px rgba(255, 255, 255, 0.5); !* 内部光泽 *!*/
+/*    }*/
+
+/*    !* 悬浮时的光晕效果 *!*/
+/*    .hover-glow {*/
+/*        transition: all 0.4s ease;*/
+/*    }*/
+
+/*    .hover-glow:hover {*/
+/*        box-shadow: 0 0 15px var(--aether-teal), 0 0 5px var(--time-gold);*/
+/*        border-color: var(--time-gold);*/
+/*    }*/
+
+/*    !* 极细滚动条 *!*/
+/*    .custom-scrollbar::-webkit-scrollbar {*/
+/*        width: 3px;*/
+/*    }*/
+
+/*    .custom-scrollbar::-webkit-scrollbar-track {*/
+/*        background: transparent;*/
+/*    }*/
+
+/*    .custom-scrollbar::-webkit-scrollbar-thumb {*/
+/*        background-color: var(--mist-blue);*/
+/*        border-radius: 10px;*/
+/*    }*/
+/*}*/
+
+/*!* 🗺️ 地图滤镜：让地图看起来像褪色的旧照片但又很清晰 *!*/
+/*.vintage-map-tiles {*/
+/*    filter: sepia(0.15) contrast(1.05) brightness(1.02) hue-rotate(-10deg);*/
+/*    opacity: 0.9;*/
+/*}*/
+
+/*!* Leaflet Popup 玻璃化 *!*/
+/*.leaflet-popup-content-wrapper, .leaflet-popup-tip {*/
+/*    background: rgba(255, 255, 255, 0.85) !important;*/
+/*    backdrop-filter: blur(8px);*/
+/*    border: 1px solid var(--white);*/
+/*    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1) !important;*/
+/*    border-radius: 8px !important;*/
+/*}*/
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-serif: var(--font-libre);
+    --font-mono: var(--font-geist-mono);
+
+    /* 🌌 Time Atlas Palette (时空图谱色盘) */
+    --color-atlas-paper: var(--atlas-paper);     /* 陶瓷白底色 (98%不透明) */
+    --color-deep-ocean: var(--deep-ocean);       /* 深海蓝 (主文字) */
+    --color-faded-slate: var(--faded-slate);     /* 蓝灰 (次要信息/线条) */
+    --color-time-gold: var(--time-gold);         /* 玫瑰金/铜色 (高亮/强调) */
+    --color-grid-line: var(--grid-line);         /* 微弱网格线 */
+    /* 映射 Shadcn */
+    --color-card: var(--atlas-paper);
+    --color-card-foreground: var(--deep-ocean);
+    --color-popover: var(--atlas-paper);
+    --color-popover-foreground: var(--deep-ocean);
+    --color-primary: var(--deep-ocean);
+    --color-primary-foreground: var(--atlas-paper);
+    --color-secondary: var(--faded-slate);
+    --color-secondary-foreground: var(--atlas-paper);
+    --color-muted: var(--grid-line);
+    --color-muted-foreground: var(--faded-slate);
+    --color-accent: var(--time-gold);
+    --color-accent-foreground: var(--atlas-paper);
+    --color-destructive: var(--time-gold); /* 强调色作为 Destructive */
+    --color-destructive-foreground: var(--atlas-paper);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--time-gold);
+
+    --radius-sm: 0.3rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.8rem;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+    /* 材质：高质感的实色，浅色系 */
+    --atlas-paper: oklch(0.99 0.005 85); /* 极浅的米白，像陶瓷 */
+    --deep-ocean: oklch(0.25 0.04 250); /* 深邃、理性的海军蓝 */
+    --faded-slate: oklch(0.55 0.03 240); /* 蓝灰，用于注释和细节 */
+    --time-gold: oklch(0.70 0.15 60); /* 玫瑰金/铜色 */
+    --grid-line: oklch(0.94 0.01 250); /* 装饰网格线 */
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+    --background: #f3f5f7; /* 整体大背景带一点灰，衬托白色卡片 */
+    --foreground: var(--deep-ocean);
+
+    --border: oklch(0.92 0.01 250); /* 极细边框 */
+    --input: var(--atlas-paper);
+
+    --radius: 0.5rem;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        /* 背景：微弱的网格纹理，像绘图桌 */
+        background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    /* 强制所有标题使用衬线体 */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-serif), ui-serif, Georgia, serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+}
+
+@layer utilities {
+    /* 移除旧的羊皮纸纹理 */
+    .bg-parchment {
+        background-color: var(--background);
+        background-image: none;
+    }
+
+    /* ✨ 核心卡片样式：实心、高雅投影、现代边框 (代替旧的 bg-paper/bg-parchment) */
+    .bg-ceramic {
+        background-color: var(--atlas-paper); /* 接近纯白，高不透明度 */
+        backdrop-filter: blur(4px);
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 30px -10px rgba(30, 40, 60, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .shadow-ceramic {
+        box-shadow: 0 4px 15px rgba(30, 40, 60, 0.1);
+    }
+
+    /* 新增：复古细滚动条 */
+    .custom-scrollbar {
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: var(--faded-slate) transparent;
+    }
+
+    /* Webkit (Chrome, Safari, Edge) 定制 */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 5px; /* 极细 */
+        height: 5px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--faded-slate);
+        border-radius: 5px;
+        opacity: 0.6;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: var(--time-gold);
+    }
+
+    .text-balance {
+        text-wrap: balance;
+    }
+}
+
+/* 🗺️ 地图滤镜：让地图看起来像褪色的旧照片但又很清晰 */
+.vintage-map-tiles {
+    filter: sepia(0.1) contrast(1.05) brightness(1.05) hue-rotate(-10deg);
+    opacity: 0.95;
+}
+
+/* Leaflet Popup 现代/陶瓷化 */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: var(--atlas-paper) !important;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 15px rgba(30, 40, 60, 0.15) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.leaflet-popup-content {
+    font-family: var(--font-serif) !important;
+    color: var(--deep-ocean) !important;
+    margin: 10px !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--faded-slate) !important;
+}
+
+/* 扫描动画 (用于 Details Sheet) */
+@keyframes scan {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    5% {
+        opacity: 1;
+    }
+    95% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+.animate-scan {
+    animation: scan 4s linear infinite;
 }
