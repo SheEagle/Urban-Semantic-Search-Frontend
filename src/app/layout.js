@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-    title: "Historical Maps",
+    title: "Then.",
     description: "Cartographic Archives Search",
 };
 

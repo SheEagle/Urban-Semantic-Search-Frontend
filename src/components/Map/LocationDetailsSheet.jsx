@@ -453,11 +453,22 @@ export function LocationDetailsSheet({location, open, onOpenChange}) {
     const scorePercent = (location.score * 100).toFixed(1);
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
+        <Sheet
+            open={open}
+            onOpenChange={onOpenChange}
+            // 🔥 关键修改 1: 禁用模态模式
+            modal={false}
+        >
             <SheetContent
                 // 使用 bg-ceramic (高不透明度，浅色系)
-                className="w-[450px] sm:w-[550px] p-0 border-l border-border shadow-2xl bg-ceramic z-[2000] focus-visible:outline-none flex flex-col h-full overflow-hidden"
-                onInteractOutside={(e) => e.preventDefault()}
+                className="w-[450px] sm:w-[550px] p-0 border-l border-border shadow-2xl bg-ceramic z-[2000] focus-visible:outline-none flex flex-col h-full overflow-hidden [&>button]:hidden"
+
+                // 🔥 关键修改 2: 移除“点击外部关闭”的行为（因为我们要允许点击地图）
+                // 在 modal={false} 时，这个属性通常是自动生效的，但显式写上更安全
+                onInteractOutside={(e) => {
+                    // 阻止 Sheet 捕获外部点击事件，让事件穿透到地图上
+                    e.preventDefault();
+                }}
             >
                 {/* --- 1. 顶部：视觉证据 (Visual Evidence) --- */}
                 <div
