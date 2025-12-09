@@ -434,192 +434,506 @@
 //     );
 // }
 
+// 'use client';
+//
+// import {Sheet, SheetContent} from "@/components/ui/sheet";
+// import {Badge} from "@/components/ui/badge";
+// import {Copy, MapPin, Scan, Clock, X} from "lucide-react";
+// import {Button} from "@/components/ui/button";
+//
+// // 用于复制到剪贴板的辅助函数
+// const copyToClipboard = (text) => {
+//     navigator.clipboard.writeText(text);
+// };
+//
+// // 辅助组件：元数据行
+// const MetaRow = ({label, value, icon: Icon}) => {
+//     if (!value) return null;
+//     return (
+//         <div className="flex justify-between items-start py-2 border-b border-border/50 last:border-0">
+//             <div className="flex items-center gap-2 text-slate-500">
+//                 {Icon && <Icon size={14}/>}
+//                 <span className="text-[10px] font-bold uppercase tracking-wide">{label}</span>
+//             </div>
+//             <span className="text-sm font-serif text-slate-800 text-right max-w-[60%] break-words leading-tight">
+//                 {String(value)}
+//             </span>
+//         </div>
+//     );
+// };
+//
+// export function LocationDetailsSheet({location, open, onOpenChange}) {
+//     if (!location) return null;
+//
+//     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg"; // 假设的底图URL
+//     const scorePercent = (location.score * 100).toFixed(1);
+//
+//     return (
+//         <Sheet
+//             open={open}
+//             onOpenChange={onOpenChange}
+//             // 🔥 关键修改 1: 禁用模态模式
+//             modal={false}
+//         >
+//             <SheetContent
+//                 // 使用 bg-ceramic (高不透明度，浅色系)
+//                 className="w-[450px] sm:w-[550px] p-0 border-l border-border shadow-2xl bg-ceramic z-[2000] focus-visible:outline-none flex flex-col h-full overflow-hidden [&>button]:hidden"
+//
+//                 // 🔥 关键修改 2: 移除“点击外部关闭”的行为（因为我们要允许点击地图）
+//                 // 在 modal={false} 时，这个属性通常是自动生效的，但显式写上更安全
+//                 onInteractOutside={(e) => {
+//                     // 阻止 Sheet 捕获外部点击事件，让事件穿透到地图上
+//                     e.preventDefault();
+//                 }}
+//             >
+//                 {/* --- 1. 顶部：视觉证据 (Visual Evidence) --- */}
+//                 <div
+//                     className="relative w-full h-[250px] bg-deep-ocean/5 overflow-hidden shrink-0 border-b border-border">
+//
+//                     {/* 背景模糊处理，制造景深 */}
+//                     <div
+//                         className="absolute inset-0 bg-cover bg-center blur-md opacity-30 scale-110 grayscale-[30%]"
+//                         style={{backgroundImage: `url(${fullMapUrl})`}}
+//                     />
+//
+//                     {/* 核心切片展示：像一个悬浮的精密透镜 */}
+//                     <div className="absolute inset-0 flex items-center justify-center">
+//                         {location.pixel_coords ? (
+//                             <div
+//                                 className="relative group shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
+//                                 {/* 边框：金属感光环 */}
+//                                 <div
+//                                     className="absolute -inset-2 border-2 border-time-gold/40 rounded-sm opacity-50"></div>
+//
+//                                 {/* 图片本体 */}
+//                                 <div
+//                                     className="relative w-56 h-36 overflow-hidden bg-atlas-paper border-2 border-deep-ocean/10 rounded-sm"
+//                                     style={{boxShadow: '0 10px 30px -5px rgba(0,0,0,0.2)'}}
+//                                 >
+//                                     <div
+//                                         className="w-full h-full transition-all duration-700 filter contrast-[1.05] sepia-[0.1]"
+//                                         style={{
+//                                             backgroundRepeat: 'no-repeat',
+//                                             backgroundImage: `url(${fullMapUrl})`,
+//                                             backgroundPosition: `-${location.pixel_coords[0]}px -${location.pixel_coords[1]}px`,
+//                                         }}
+//                                     />
+//                                     {/* 扫描线动画装饰 */}
+//                                     <div
+//                                         className="absolute inset-0 bg-gradient-to-b from-transparent via-time-gold/30 to-transparent animate-scan pointer-events-none opacity-40"></div>
+//                                 </div>
+//                             </div>
+//                         ) : (
+//                             <div className="text-faded-slate italic font-serif">Visual fragment corrupted</div>
+//                         )}
+//                     </div>
+//
+//                     {/* 关闭按钮 */}
+//                     <button
+//                         onClick={() => onOpenChange(false)}
+//                         className="absolute top-5 right-5 z-50 p-2 rounded-full bg-atlas-paper/80 hover:bg-deep-ocean hover:text-time-gold text-deep-ocean shadow-md transition-all duration-300 border border-border"
+//                     >
+//                         <X size={18} strokeWidth={2}/>
+//                     </button>
+//                 </div>
+//
+//                 {/* --- 2. 内容滚动区 --- */}
+//                 <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+//
+//                     {/* 标题部分 */}
+//                     <div className="relative">
+//                         {/* 左侧装饰竖线：精密仪器的刻度感 */}
+//                         <div className="absolute -left-4 top-1 bottom-1 w-0.5 bg-time-gold/50 rounded-full"></div>
+//
+//                         <div
+//                             className="flex items-center gap-3 mb-2 text-faded-slate text-[10px] font-mono tracking-widest uppercase">
+//                             <span className="flex items-center gap-1"><Clock size={12}/> Chrono-Index</span>
+//                             <span className="w-px h-3 bg-faded-slate/30"></span>
+//                             <span>ID: {location.id.substring(0, 8)}</span>
+//                         </div>
+//
+//                         <h2 className="text-3xl font-serif text-deep-ocean font-bold leading-tight text-balance">
+//                             {location.fullData?.image_source || "Unidentified Chronicle"}
+//                         </h2>
+//                     </div>
+//
+//                     {/* 数据仪表盘 (Grid Layout) */}
+//                     <div className="grid grid-cols-2 gap-4">
+//                         {/* 匹配度卡片 */}
+//                         <div
+//                             className="p-4 rounded-lg bg-deep-ocean/5 border border-border flex flex-col justify-between group hover:border-time-gold/30 transition-colors">
+//                             <div className="flex justify-between items-start mb-2">
+//                                 <Scan size={16} className="text-time-gold"/>
+//                                 <span className="text-[10px] font-bold text-faded-slate uppercase">Confidence</span>
+//                             </div>
+//                             <div className="flex items-baseline gap-1">
+//                                 <span className="text-3xl font-mono font-light text-deep-ocean">{scorePercent}</span>
+//                                 <span className="text-xs text-faded-slate">%</span>
+//                             </div>
+//                             {/* 简单的进度条 */}
+//                             <div className="w-full h-1 bg-deep-ocean/10 rounded-full mt-2 overflow-hidden">
+//                                 <div className="h-full bg-time-gold shadow-md shadow-time-gold/50"
+//                                      style={{width: `${scorePercent}%`}}></div>
+//                             </div>
+//                         </div>
+//
+//                         {/* 坐标卡片 */}
+//                         <div
+//                             className="p-4 rounded-lg bg-deep-ocean/5 border border-border group hover:border-deep-ocean/20 transition-colors relative overflow-hidden">
+//                             <div className="flex justify-between items-start mb-3">
+//                                 <MapPin size={16}
+//                                         className="text-deep-ocean/60 group-hover:text-deep-ocean transition-colors"/>
+//                                 <span className="text-[10px] font-bold text-faded-slate uppercase">Geospatial</span>
+//                             </div>
+//                             <div className="space-y-1">
+//                                 {/* Latitude */}
+//                                 <div
+//                                     className="flex justify-between items-center text-xs font-mono text-deep-ocean border-b border-border pb-1">
+//                                     <span className="text-faded-slate">LAT</span>
+//                                     <span>{location.lat.toFixed(5)} N</span>
+//                                 </div>
+//                                 {/* Longitude */}
+//                                 <div
+//                                     className="flex justify-between items-center text-xs font-mono text-deep-ocean pt-1">
+//                                     <span className="text-faded-slate">LON</span>
+//                                     <span>{location.lon.toFixed(5)} E</span>
+//                                 </div>
+//                                 <div
+//                                     className="flex justify-between items-center text-xs font-mono text-deep-ocean pt-1">
+//                                     <span className="text-faded-slate">LON</span>
+//                                     <span>{location.pixel_coords[0]} </span>
+//                                     <span>{location.pixel_coords[1]} </span>
+//                                 </div>
+//                             </div>
+//                             <Button
+//                                 variant="ghost"
+//                                 size="icon"
+//                                 className="absolute bottom-1 right-1 h-6 w-6 text-faded-slate hover:text-time-gold"
+//                                 onClick={() => copyToClipboard(`${location.lat}, ${location.lon}`)}
+//                             >
+//                                 <Copy size={12}/>
+//                             </Button>
+//                         </div>
+//                     </div>
+//
+//                     {/* 描述/上下文区域 */}
+//                     <div className="space-y-3 pt-4">
+//                         <h3 className="text-sm font-bold text-deep-ocean border-b border-border pb-2 flex items-center gap-2">
+//                             <span className="w-1.5 h-1.5 rounded-full bg-time-gold"></span>
+//                             Historical Context
+//                         </h3>
+//                         <div className="text-sm text-slate-600 leading-relaxed font-serif text-justify">
+//                             <p>
+//                                 Temporal cross-referencing confirms this map fragment aligns perfectly with the known
+//                                 18th-century cartographic dataset for the Venice region. The high confidence score
+//                                 suggests that, despite the chronological gap, the spatial data remains largely intact,
+//                                 offering a unique temporal perspective on this location.
+//                             </p>
+//                         </div>
+//                     </div>
+//
+//                 </div>
+//
+//                 {/* --- 3. 底部操作栏 --- */}
+//                 <div className="p-6 border-t border-border bg-deep-ocean/5 backdrop-blur-sm shrink-0">
+//                     <Button
+//                         className="w-full h-12 bg-deep-ocean hover:bg-deep-ocean/90 text-atlas-paper font-serif tracking-wide shadow-lg shadow-deep-ocean/20 rounded-md group"
+//                         style={{backgroundColor: 'var(--deep-ocean)'}}
+//                     >
+//                         <MapPin className="mr-2 h-4 w-4 group-hover:-translate-y-1 transition-transform"/>
+//                         NAVIGATE TO FRAGMENT
+//                     </Button>
+//                 </div>
+//             </SheetContent>
+//         </Sheet>
+//     );
+// }
+
+
 'use client';
 
 import {Sheet, SheetContent} from "@/components/ui/sheet";
 import {Badge} from "@/components/ui/badge";
-import {Copy, MapPin, Scan, Clock, X} from "lucide-react";
+import {Copy, MapPin, Scan, Clock, X, FileText, ScrollText, Database, User, Globe, Tag} from "lucide-react";
 import {Button} from "@/components/ui/button";
 
-// 用于复制到剪贴板的辅助函数
+// 复制功能
 const copyToClipboard = (text) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
+};
+
+// --- 辅助组件：通用元数据行 ---
+const MetaRow = ({label, value, icon: Icon}) => {
+    if (value === null || value === undefined || value === "") return null;
+    return (
+        <div
+            className="flex justify-between items-start py-2.5 border-b border-border/40 last:border-0 group hover:bg-black/5 px-2 rounded-md transition-colors">
+            <div className="flex items-center gap-2 text-faded-slate shrink-0">
+                {Icon ? <Icon size={14}/> : <div className="w-3.5"/>} {/* 占位符保持对齐 */}
+                <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+            </div>
+            <span
+                className="text-sm font-serif text-deep-ocean text-right max-w-[65%] break-words leading-tight selection:bg-time-gold/30">
+                {String(value)}
+            </span>
+        </div>
+    );
 };
 
 export function LocationDetailsSheet({location, open, onOpenChange}) {
     if (!location) return null;
 
-    const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg"; // 假设的底图URL
+    // 1. 判断数据类型
+    // 兼容后端直接返回 type 字段，或者藏在 fullData 里
+    const type = location.fullData?.type || location.type || 'map_tile';
+    const isDocument = type === 'document';
+
+    // 2. 提取数据
+    const meta = location.fullData || {};
     const scorePercent = (location.score * 100).toFixed(1);
+
+    // 假设的底图 (仅用于地图切片展示)
+    const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
 
     return (
         <Sheet
             open={open}
             onOpenChange={onOpenChange}
-            // 🔥 关键修改 1: 禁用模态模式
-            modal={false}
+            modal={false} // 允许操作地图
         >
             <SheetContent
-                // 使用 bg-ceramic (高不透明度，浅色系)
-                className="w-[450px] sm:w-[550px] p-0 border-l border-border shadow-2xl bg-ceramic z-[2000] focus-visible:outline-none flex flex-col h-full overflow-hidden [&>button]:hidden"
-
-                // 🔥 关键修改 2: 移除“点击外部关闭”的行为（因为我们要允许点击地图）
-                // 在 modal={false} 时，这个属性通常是自动生效的，但显式写上更安全
-                onInteractOutside={(e) => {
-                    // 阻止 Sheet 捕获外部点击事件，让事件穿透到地图上
-                    e.preventDefault();
-                }}
+                // 使用 bg-ceramic 配合磨砂效果
+                className="w-[450px] sm:w-[550px] p-0 border-l border-border/60 shadow-2xl bg-[#fdfbf7]/95 backdrop-blur-md z-[2000] focus-visible:outline-none flex flex-col h-full overflow-hidden [&>button]:hidden"
+                onInteractOutside={(e) => e.preventDefault()}
             >
-                {/* --- 1. 顶部：视觉证据 (Visual Evidence) --- */}
-                <div
-                    className="relative w-full h-[250px] bg-deep-ocean/5 overflow-hidden shrink-0 border-b border-border">
-
-                    {/* 背景模糊处理，制造景深 */}
-                    <div
-                        className="absolute inset-0 bg-cover bg-center blur-md opacity-30 scale-110 grayscale-[30%]"
-                        style={{backgroundImage: `url(${fullMapUrl})`}}
-                    />
-
-                    {/* 核心切片展示：像一个悬浮的精密透镜 */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        {location.pixel_coords ? (
-                            <div
-                                className="relative group shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
-                                {/* 边框：金属感光环 */}
-                                <div
-                                    className="absolute -inset-2 border-2 border-time-gold/40 rounded-sm opacity-50"></div>
-
-                                {/* 图片本体 */}
-                                <div
-                                    className="relative w-56 h-36 overflow-hidden bg-atlas-paper border-2 border-deep-ocean/10 rounded-sm"
-                                    style={{boxShadow: '0 10px 30px -5px rgba(0,0,0,0.2)'}}
-                                >
-                                    <div
-                                        className="w-full h-full transition-all duration-700 filter contrast-[1.05] sepia-[0.1]"
-                                        style={{
-                                            backgroundRepeat: 'no-repeat',
-                                            backgroundImage: `url(${fullMapUrl})`,
-                                            backgroundPosition: `-${location.pixel_coords[0]}px -${location.pixel_coords[1]}px`,
-                                        }}
-                                    />
-                                    {/* 扫描线动画装饰 */}
-                                    <div
-                                        className="absolute inset-0 bg-gradient-to-b from-transparent via-time-gold/30 to-transparent animate-scan pointer-events-none opacity-40"></div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-faded-slate italic font-serif">Visual fragment corrupted</div>
-                        )}
-                    </div>
+                {/* ================= 1. 顶部视觉区域 (Visual Header) ================= */}
+                <div className="relative w-full h-[240px] shrink-0 border-b border-border overflow-hidden group">
 
                     {/* 关闭按钮 */}
                     <button
                         onClick={() => onOpenChange(false)}
-                        className="absolute top-5 right-5 z-50 p-2 rounded-full bg-atlas-paper/80 hover:bg-deep-ocean hover:text-time-gold text-deep-ocean shadow-md transition-all duration-300 border border-border"
+                        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/80 hover:bg-deep-ocean hover:text-time-gold text-deep-ocean shadow-md transition-all duration-300 border border-border"
                     >
                         <X size={18} strokeWidth={2}/>
                     </button>
+
+                    {isDocument ? (
+                        // --- A. 文献模式 Header ---
+                        <div
+                            className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#f4f1ea]">
+                            {/* 背景纹理：纸张质感 */}
+                            <div
+                                className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] mix-blend-multiply"></div>
+
+                            {/* 图标徽章 */}
+                            <div
+                                className="relative w-20 h-20 rounded-full bg-white border-4 border-double border-time-gold/40 flex items-center justify-center mb-5 shadow-sm z-10">
+                                <ScrollText size={36} className="text-time-gold drop-shadow-sm"/>
+                            </div>
+
+                            {/* 标题 */}
+                            <h2 className="relative z-10 text-2xl font-serif font-bold text-deep-ocean line-clamp-2 px-4 leading-tight">
+                                {meta.source_dataset || "Historical Archive"}
+                            </h2>
+
+                            {/* 快速标签 */}
+                            <div className="relative z-10 mt-3 flex flex-wrap justify-center gap-2">
+                                <Badge variant="outline"
+                                       className="bg-white/60 border-deep-ocean/10 text-deep-ocean text-[10px] tracking-wider uppercase">
+                                    <Clock size={10} className="mr-1.5"/> {meta.year || "Unknown Era"}
+                                </Badge>
+                                <Badge variant="outline"
+                                       className="bg-white/60 border-deep-ocean/10 text-deep-ocean text-[10px] tracking-wider uppercase">
+                                    ID: {location.id.substring(0, 8)}
+                                </Badge>
+                            </div>
+                        </div>
+                    ) : (
+                        // --- B. 地图模式 Header ---
+                        <div className="w-full h-full bg-deep-ocean/5 relative">
+                            {/* 背景模糊 */}
+                            <div
+                                className="absolute inset-0 bg-cover bg-center blur-md opacity-40 scale-110 grayscale-[20%]"
+                                style={{backgroundImage: `url(${fullMapUrl})`}}
+                            />
+
+                            {/* 切片透镜效果 */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                {location.pixel_coords ? (
+                                    <div
+                                        className="relative group/lens shadow-2xl transition-transform duration-500 hover:scale-[1.02]">
+                                        {/* 金色边框 */}
+                                        <div
+                                            className="absolute -inset-1.5 border border-time-gold/50 rounded-sm opacity-60"></div>
+
+                                        <div
+                                            className="relative w-64 h-40 overflow-hidden bg-atlas-paper border-4 border-white rounded-sm shadow-inner">
+                                            <div
+                                                className="w-full h-full transition-all duration-700 filter contrast-[1.1] sepia-[0.15] group-hover/lens:scale-110"
+                                                style={{
+                                                    backgroundRepeat: 'no-repeat',
+                                                    backgroundImage: `url(${fullMapUrl})`,
+                                                    // 根据像素坐标定位
+                                                    backgroundPosition: `-${location.pixel_coords[0]}px -${location.pixel_coords[1]}px`,
+                                                }}
+                                            />
+                                            {/* 扫描动画 */}
+                                            <div
+                                                className="absolute inset-0 bg-gradient-to-b from-transparent via-time-gold/20 to-transparent h-[200%] w-full animate-scan pointer-events-none opacity-50"></div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center text-faded-slate/50">
+                                        <Globe size={48} strokeWidth={1}/>
+                                        <span className="text-sm mt-2 italic font-serif">Visual fragment data unavailable</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* --- 2. 内容滚动区 --- */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+                {/* ================= 2. 内容滚动区 ================= */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar px-8 py-6 space-y-8">
 
-                    {/* 标题部分 */}
-                    <div className="relative">
-                        {/* 左侧装饰竖线：精密仪器的刻度感 */}
-                        <div className="absolute -left-4 top-1 bottom-1 w-0.5 bg-time-gold/50 rounded-full"></div>
-
-                        <div
-                            className="flex items-center gap-3 mb-2 text-faded-slate text-[10px] font-mono tracking-widest uppercase">
-                            <span className="flex items-center gap-1"><Clock size={12}/> Chrono-Index</span>
-                            <span className="w-px h-3 bg-faded-slate/30"></span>
-                            <span>ID: {location.id.substring(0, 8)}</span>
+                    {/* 顶部状态栏 */}
+                    <div className="flex justify-between items-end border-b border-border pb-4">
+                        <div>
+                            <div
+                                className="flex items-center gap-2 text-faded-slate text-[10px] font-mono tracking-widest uppercase mb-1">
+                                <Database size={12}/>
+                                <span>{isDocument ? "Textual Record" : "Cartographic Fragment"}</span>
+                            </div>
+                            <h1 className="text-xl font-serif text-deep-ocean font-bold">
+                                {isDocument ? "Document Details" : "Map Location"}
+                            </h1>
                         </div>
-
-                        <h2 className="text-3xl font-serif text-deep-ocean font-bold leading-tight text-balance">
-                            {location.fullData?.image_source || "Unidentified Chronicle"}
-                        </h2>
-                    </div>
-
-                    {/* 数据仪表盘 (Grid Layout) */}
-                    <div className="grid grid-cols-2 gap-4">
-                        {/* 匹配度卡片 */}
-                        <div
-                            className="p-4 rounded-lg bg-deep-ocean/5 border border-border flex flex-col justify-between group hover:border-time-gold/30 transition-colors">
-                            <div className="flex justify-between items-start mb-2">
-                                <Scan size={16} className="text-time-gold"/>
-                                <span className="text-[10px] font-bold text-faded-slate uppercase">Confidence</span>
+                        {/* 匹配度 */}
+                        <div className="text-right">
+                            <div className="text-[10px] font-bold text-faded-slate uppercase mb-0.5">Confidence</div>
+                            <div
+                                className="text-2xl font-mono text-time-gold font-light tracking-tighter">{scorePercent}%
                             </div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-mono font-light text-deep-ocean">{scorePercent}</span>
-                                <span className="text-xs text-faded-slate">%</span>
-                            </div>
-                            {/* 简单的进度条 */}
-                            <div className="w-full h-1 bg-deep-ocean/10 rounded-full mt-2 overflow-hidden">
-                                <div className="h-full bg-time-gold shadow-md shadow-time-gold/50"
-                                     style={{width: `${scorePercent}%`}}></div>
-                            </div>
-                        </div>
-
-                        {/* 坐标卡片 */}
-                        <div
-                            className="p-4 rounded-lg bg-deep-ocean/5 border border-border group hover:border-deep-ocean/20 transition-colors relative overflow-hidden">
-                            <div className="flex justify-between items-start mb-3">
-                                <MapPin size={16}
-                                        className="text-deep-ocean/60 group-hover:text-deep-ocean transition-colors"/>
-                                <span className="text-[10px] font-bold text-faded-slate uppercase">Geospatial</span>
-                            </div>
-                            <div className="space-y-1">
-                                {/* Latitude */}
-                                <div
-                                    className="flex justify-between items-center text-xs font-mono text-deep-ocean border-b border-border pb-1">
-                                    <span className="text-faded-slate">LAT</span>
-                                    <span>{location.lat.toFixed(5)} N</span>
-                                </div>
-                                {/* Longitude */}
-                                <div
-                                    className="flex justify-between items-center text-xs font-mono text-deep-ocean pt-1">
-                                    <span className="text-faded-slate">LON</span>
-                                    <span>{location.lon.toFixed(5)} E</span>
-                                </div>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="absolute bottom-1 right-1 h-6 w-6 text-faded-slate hover:text-time-gold"
-                                onClick={() => copyToClipboard(`${location.lat}, ${location.lon}`)}
-                            >
-                                <Copy size={12}/>
-                            </Button>
                         </div>
                     </div>
 
-                    {/* 描述/上下文区域 */}
-                    <div className="space-y-3 pt-4">
-                        <h3 className="text-sm font-bold text-deep-ocean border-b border-border pb-2 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-time-gold"></span>
-                            Historical Context
+                    {/* --- A. 文献内容摘要 (Transcript) --- */}
+                    {isDocument && (
+                        <div className="relative">
+                            <h3 className="text-xs font-bold text-deep-ocean mb-3 uppercase tracking-wide flex items-center gap-2">
+                                <FileText size={14} className="text-time-gold"/>
+                                Transcript
+                            </h3>
+                            <div
+                                className="bg-white p-6 rounded-lg border border-border/60 shadow-sm relative overflow-hidden group hover:border-time-gold/30 transition-colors">
+                                {/* 装饰引号 */}
+                                <div
+                                    className="absolute top-2 left-3 text-6xl font-serif text-deep-ocean/5 pointer-events-none">“
+                                </div>
+
+                                <p className="font-serif text-lg leading-relaxed text-deep-ocean/90 italic relative z-10 selection:bg-time-gold/20">
+                                    {meta.content || location.content || "No transcript available."}
+                                </p>
+
+                                <div
+                                    className="absolute bottom-2 right-3 text-6xl font-serif text-deep-ocean/5 pointer-events-none rotate-180">“
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- B. 元数据列表 (Metadata Registry) --- */}
+                    <div>
+                        <h3 className="text-xs font-bold text-deep-ocean mb-3 uppercase tracking-wide flex items-center gap-2">
+                            <Scan size={14} className="text-time-gold"/>
+                            Metadata Registry
                         </h3>
-                        <div className="text-sm text-slate-600 leading-relaxed font-serif text-justify">
-                            <p>
-                                Temporal cross-referencing confirms this map fragment aligns perfectly with the known
-                                18th-century cartographic dataset for the Venice region. The high confidence score
-                                suggests that, despite the chronological gap, the spatial data remains largely intact,
-                                offering a unique temporal perspective on this location.
-                            </p>
+
+                        <div className="bg-white/60 rounded-lg border border-border/60 px-4 py-1 shadow-sm">
+                            {/* 1. 基础字段 */}
+                            <MetaRow label="Dataset" value={meta.source_dataset || meta.source_image} icon={Database}/>
+                            <MetaRow label="Year" value={meta.year} icon={Clock}/>
+                            <MetaRow label="Record ID" value={meta.original_id || location.id} icon={Scan}/>
+
+                            {/* 2. 动态遍历 Metadata 字典 (排除已显示的) */}
+                            {meta.metadata && typeof meta.metadata === 'object' && Object.entries(meta.metadata).map(([key, value]) => {
+                                // 过滤掉技术字段或已展示字段
+                                if (['uid', 'author_geo', 'year'].includes(key)) return null;
+
+                                // 格式化 Key: "author_name" -> "Author Name"
+                                const formattedLabel = key.replace(/_/g, ' ');
+
+                                return <MetaRow key={key} label={formattedLabel} value={value} icon={Tag}/>;
+                            })}
+
+                            {/* 3. 特殊字段处理 */}
+                            {meta.chunk_id && <MetaRow label="Chunk Sequence" value={meta.chunk_id}/>}
+
+                            {/* 4. 地图特有字段 */}
+                            {!isDocument && (
+                                <>
+                                    <MetaRow label="Pixel Coordinates" value={location.pixel_coords?.join(', ')}/>
+                                    {meta.geo_detail && (
+                                        <MetaRow label="Geo Bounds" value="Polygon Data Available"/>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
 
+                    {/* --- C. 坐标卡片 (通用) --- */}
+                    <div
+                        className="p-4 rounded-lg bg-deep-ocean/5 border border-border/60 flex items-center justify-between group hover:border-deep-ocean/20 transition-colors">
+                        <div className="flex items-center gap-4">
+                            <div
+                                className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-deep-ocean shadow-sm border border-border/50">
+                                <MapPin size={18}/>
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-bold text-faded-slate uppercase">Coordinates (WGS84)
+                                </div>
+                                <div className="font-mono text-sm text-deep-ocean font-medium mt-0.5">
+                                    {location.lat.toFixed(6)}, {location.lon.toFixed(6)}
+                                </div>
+                            </div>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(`${location.lat}, ${location.lon}`)}
+                            className="text-faded-slate hover:text-deep-ocean hover:bg-white/50"
+                        >
+                            <Copy size={14} className="mr-2"/> Copy
+                        </Button>
+                    </div>
+
+                    {/* 底部留白，防止被按钮遮挡 */}
+                    <div className="h-4"></div>
                 </div>
 
-                {/* --- 3. 底部操作栏 --- */}
-                <div className="p-6 border-t border-border bg-deep-ocean/5 backdrop-blur-sm shrink-0">
+                {/* ================= 3. 底部操作栏 ================= */}
+                <div className="p-6 border-t border-border bg-[#fdfbf7]/90 backdrop-blur-md shrink-0">
                     <Button
-                        className="w-full h-12 bg-deep-ocean hover:bg-deep-ocean/90 text-atlas-paper font-serif tracking-wide shadow-lg shadow-deep-ocean/20 rounded-md group"
-                        style={{backgroundColor: 'var(--deep-ocean)'}}
+                        className={`w-full h-12 font-serif tracking-wide shadow-lg rounded-md group transition-all duration-300
+                            ${isDocument
+                            ? "bg-deep-ocean hover:bg-deep-ocean/90 text-white"
+                            : "bg-deep-ocean hover:bg-deep-ocean/90 text-white"
+                        }`}
                     >
-                        <MapPin className="mr-2 h-4 w-4 group-hover:-translate-y-1 transition-transform"/>
-                        NAVIGATE TO FRAGMENT
+                        {isDocument ? (
+                            <div className="flex items-center">
+                                <MapPin
+                                    className="mr-2 h-4 w-4 text-time-gold group-hover:-translate-y-1 transition-transform"/>
+                                <span>LOCATE DOCUMENT ON MAP</span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center">
+                                <MapPin
+                                    className="mr-2 h-4 w-4 text-time-gold group-hover:-translate-y-1 transition-transform"/>
+                                <span>NAVIGATE TO FRAGMENT</span>
+                            </div>
+                        )}
                     </Button>
                 </div>
             </SheetContent>

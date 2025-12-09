@@ -1,89 +1,118 @@
 'use client';
 
-import {useState, useEffect, useMemo} from 'react';
-import {Slider} from "@/components/ui/slider";
+import { useState, useMemo } from 'react';
+import { Slider } from "@/components/ui/slider";
 
-export function TimelineControl({data, onFilterChange}) {
-    // 假设数据范围，实际应从 data 中计算
+export function TimelineControl({ data, onFilterChange }) {
     const MIN_YEAR = 1000;
     const MAX_YEAR = 2024;
 
-    // 双向滑块的状态 [start, end]
+    // 🔥 核心改动 1: 极大增加柱子数量
+    // 1024年 / 256 ≈ 4年/柱。
+    // 这样的密度下，滑块稍微一动，柱子就会立即变色，视觉反馈非常精准。
+    const BUCKET_COUNT = 256;
+
     const [range, setRange] = useState([MIN_YEAR, MAX_YEAR]);
 
-    // 1. 处理数据：将搜索结果映射到年份直方图
-    // (由于目前 API 返回可能没年份，这里模拟一下，实际请用 item.year)
+    // 1. 计算高精度直方图
     const histogramData = useMemo(() => {
-        const buckets = new Array(50).fill(0); // 分50个柱子
-        const step = (MAX_YEAR - MIN_YEAR) / 50;
+        const buckets = new Array(BUCKET_COUNT).fill(0);
+        const step = (MAX_YEAR - MIN_YEAR) / BUCKET_COUNT;
 
         data.forEach(item => {
-            // ⚠️ 实际项目中请用 item.year || item.fullData.year
-            // 这里为了演示效果，根据 ID 生成一个伪随机年份
-            const mockYear = 1400 + (item.id.charCodeAt(0) * 10) % 500;
+            let year = item.fullData?.year || item.year;
+            year = parseInt(year);
 
-            const bucketIndex = Math.floor((mockYear - MIN_YEAR) / step);
-            if (bucketIndex >= 0 && bucketIndex < 50) {
-                buckets[bucketIndex]++;
+            if (!isNaN(year) && year >= MIN_YEAR && year <= MAX_YEAR) {
+                const bucketIndex = Math.floor((year - MIN_YEAR) / step);
+                const safeIndex = Math.min(bucketIndex, BUCKET_COUNT - 1);
+                buckets[safeIndex]++;
             }
         });
 
-        // 归一化高度以便渲染
+        // 归一化
         const maxCount = Math.max(...buckets, 1);
-        return buckets.map(count => count / maxCount); // 0.0 ~ 1.0
+        return buckets.map(count => count / maxCount);
     }, [data]);
 
-    // 当滑块拖动时通知父组件
     const handleSliderChange = (newRange) => {
         setRange(newRange);
         onFilterChange(newRange);
     };
 
     return (
-        <div className="flex flex-col justify-end h-full w-full max-w-lg px-4 relative group">
+        <div className="flex flex-col justify-end h-full w-full px-1 relative group select-none">
 
-            {/* 顶部标签 */}
-            <div
-                className="flex justify-between text-[10px] font-mono text-faded-slate font-bold mb-1 uppercase tracking-widest">
-                <span>{range[0]} AD</span>
-                <span className="text-time-gold">Temporal Filter</span>
-                <span>{range[1]} AD</span>
+            {/* 顶部数字 (动态显示选中范围) */}
+            <div className="flex justify-between items-end mb-2 text-[10px] font-mono font-bold">
+                {/* 选中的起始年份 (高亮) */}
+                <div className="text-orange-600 bg-orange-50 px-1 rounded border border-orange-100">
+                    {range[0]}
+                </div>
+
+                <div className="text-slate-300 uppercase tracking-widest font-sans text-[9px] pb-0.5">
+                    <span className="text-orange-500 mr-1 text-sm font-bold">{data.length}</span>
+                    Records
+                </div>
+
+                {/* 选中的结束年份 (高亮) */}
+                <div className="text-orange-600 bg-orange-50 px-1 rounded border border-orange-100">
+                    {range[1]}
+                </div>
             </div>
 
             {/* 直方图容器 */}
-            <div
-                className="relative h-10 w-full flex items-end justify-between gap-[1px] mb-[-12px] opacity-80 transition-opacity group-hover:opacity-100">
+            {/* gap-0: 消除间隙，让它们看起来像连续的波形 */}
+            <div className="relative h-12 w-full flex items-end gap-0 mb-[-12px] z-0 px-[1px]">
+
                 {histogramData.map((height, i) => {
-                    // 计算当前柱子代表的年份
-                    const step = (MAX_YEAR - MIN_YEAR) / 50;
-                    const barYear = MIN_YEAR + i * step;
-                    // 判断柱子是否在选中范围内
-                    const isActive = barYear >= range[0] && barYear <= range[1];
+                    const step = (MAX_YEAR - MIN_YEAR) / BUCKET_COUNT;
+
+                    // 计算这根细柱子代表的具体年份段
+                    // 例如: 1740.0 - 1744.0
+                    const barStart = MIN_YEAR + i * step;
+                    const barEnd = barStart + step;
+                    const barCenter = (barStart + barEnd) / 2;
+
+                    // 🔥 核心改动 3: 严格的高亮逻辑
+                    // 只有当 [选区] 完全覆盖了 [柱子中心] 时才亮。
+                    // 这样可以避免"滑块刚碰到柱子边缘，柱子亮了，但数据其实还没包进来"的错觉。
+                    const isActive = range[1] >= barCenter && range[0] <= barCenter;
+
+                    const renderHeight = height > 0 ? `${height * 100}%` : '2px';
 
                     return (
                         <div
                             key={i}
-                            className={`w-full rounded-t-sm transition-all duration-300 ${isActive ? 'bg-deep-ocean' : 'bg-slate-200'}`}
+                            className={`
+                                w-full rounded-t-[1px] transition-colors duration-75
+                                ${isActive 
+                                    ? (height > 0 ? 'bg-orange-500' : 'bg-orange-200/50') // 选中
+                                    : (height > 0 ? 'bg-slate-300' : 'bg-slate-100/50')   // 未选中
+                                }
+                            `}
                             style={{
-                                height: `${height * 100}%`,
-                                minHeight: '4px'
+                                height: renderHeight,
+                                minHeight: '2px'
                             }}
                         />
                     );
                 })}
             </div>
 
-            {/* 双向滑块组件 */}
-            {/* 需要在 globals.css 稍微调整一下 Slider 的 thumb 样式让它更像时间轴指针 */}
+            {/* 滑块 */}
             <Slider
                 defaultValue={[MIN_YEAR, MAX_YEAR]}
                 min={MIN_YEAR}
                 max={MAX_YEAR}
-                step={10}
+                step={1} // 🔥 核心改动 2: 步进为 1，精确控制
                 value={range}
                 onValueChange={handleSliderChange}
-                className="z-10 py-2"
+                className="z-20 py-3 relative"
             />
+
+            {/* 底线 */}
+            <div className="absolute bottom-4 left-0 right-0 h-px bg-slate-200 -z-10"></div>
         </div>
     );
 }

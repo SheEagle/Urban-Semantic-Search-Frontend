@@ -463,117 +463,141 @@
 
 'use client';
 
-import {useState, useEffect} from "react";
 import {Card} from "@/components/ui/card";
-import {ArrowRight, MapPin, ChevronLeft, ChevronRight, Library} from "lucide-react";
 
-export function ResultsSidebar({results, onSelect, activeId}) {
-    // 控制折叠状态，默认展开
+import { useState, useEffect } from 'react';
+import {
+    Library,
+    ChevronLeft,
+    ChevronRight,
+    MapPin,
+    ArrowRight,
+    ScrollText, // 新增：代表文档
+    Map as MapIcon, // 新增：代表地图
+    LocateFixed
+} from 'lucide-react';
+
+
+export function ResultsSidebar({ results, onSelect, activeId }) {
+    // 控制折叠状态
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    // 当有新结果搜索出来时，自动展开侧边栏
+    // 当有新结果搜索出来时，自动展开
     useEffect(() => {
         if (results && results.length > 0) {
             setIsCollapsed(false);
         }
     }, [results]);
 
-    // 如果没有结果，完全不渲染
+    // 如果没有结果，不渲染
     if (!results || results.length === 0) return null;
 
     // 辅助函数：格式化坐标
     const formatCoord = (val, type) => {
-        if (!val) return '';
+        if (!val && val !== 0) return '';
         const dir = type === 'lat' ? (val > 0 ? 'N' : 'S') : (val > 0 ? 'E' : 'W');
         return `${Math.abs(val).toFixed(3)}° ${dir}`;
     };
 
     return (
         <div
-            // ✨ 容器层：负责定位和动画
+            // ✨ 容器层
             className={`
-                absolute top-24 z-[900] h-[calc(100vh-140px)] flex items-start transition-transform duration-500 ease-in-out
-                ${isCollapsed ? '-translate-x-[calc(100%-12px)]' : 'translate-x-6'}
+                absolute top-24 left-6 z-[900] h-[calc(100vh-140px)] flex items-start 
+                transition-all duration-500 ease-in-out
+                ${isCollapsed ? '-translate-x-[calc(100%+24px)]' : 'translate-x-0'}
             `}
         >
-            {/* 📜 侧边栏主体卡片 */}
-            <Card
-                className="w-80 h-full bg-ceramic shadow-2xl shadow-deep-ocean/20 border border-border/60 rounded-xl overflow-hidden flex flex-col backdrop-blur-sm relative"
-            >
-                {/* Header: 档案头 */}
-                <div
-                    className="px-5 py-4 border-b border-border/40 bg-atlas-paper/50 backdrop-blur-md relative z-10 shrink-0">
+            {/* 📜 主体卡片 */}
+            <div className="w-80 h-full bg-[#fdfbf7]/95 backdrop-blur-md shadow-2xl shadow-deep-ocean/30 border border-slate-200 rounded-xl overflow-hidden flex flex-col relative">
+
+                {/* Header */}
+                <div className="px-5 py-4 border-b border-slate-200 bg-white/50 shrink-0">
                     <div className="flex items-end justify-between">
-                        <h3 className="font-serif text-lg font-bold text-deep-ocean tracking-wide flex items-center gap-2">
-                            <Library size={18} className="text-time-gold"/>
+                        <h3 className="font-serif text-lg font-bold text-slate-800 tracking-wide flex items-center gap-2">
+                            <Library size={18} className="text-orange-600"/>
                             ARCHIVE INDEX
                         </h3>
-                        {/* 移动端收起按钮 */}
-                        <button
-                            onClick={() => setIsCollapsed(true)}
-                            className="text-faded-slate hover:text-deep-ocean transition-colors md:hidden"
-                        >
-                            <ChevronLeft size={16}/>
-                        </button>
                     </div>
-                    <span
-                        className="text-[10px] text-faded-slate font-mono uppercase tracking-widest mt-1 block opacity-70">
-                        VOL. {String(results.length).padStart(2, '0')}
-                    </span>
-                    {/* 装饰线条 */}
-                    <div className="absolute bottom-0 left-0 right-0 h-[3px] border-t border-border/30"></div>
+                    <div className="flex justify-between items-center mt-1">
+                        <span className="text-[10px] text-slate-400 font-mono uppercase tracking-widest">
+                            VOL. {String(results.length).padStart(2, '0')} RECORDS
+                        </span>
+                    </div>
                 </div>
 
                 {/* List Area */}
-                <div
-                    className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar w-full p-2 space-y-1 bg-[#fdfbf7]">
+                <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 space-y-2">
                     {results.map((item, index) => {
                         const isActive = activeId === item.id;
                         const score = (item.score * 100).toFixed(0);
+
+                        // 🔥 判断类型
+                        const isDoc = item.fullData?.type === 'document' || item.type === 'document';
+                        const TypeIcon = isDoc ? ScrollText : MapIcon;
 
                         return (
                             <div
                                 key={item.id}
                                 onClick={() => onSelect(item)}
                                 className={`
-                                    group relative p-3 pl-4 cursor-pointer transition-all duration-300 rounded-lg border
+                                    group relative p-3 cursor-pointer transition-all duration-300 rounded-lg border
                                     ${isActive
-                                    ? 'bg-deep-ocean border-deep-ocean shadow-lg scale-[1.02] z-10'
-                                    : 'bg-white border-transparent hover:border-border hover:bg-white hover:shadow-sm z-0'}
+                                    ? 'bg-[#1a2c42] border-[#1a2c42] shadow-lg scale-[1.02] z-10' // Active: Deep Ocean Blue
+                                    : 'bg-white border-transparent hover:border-orange-200 hover:shadow-md z-0'}
                                 `}
                             >
                                 <div className="flex flex-col gap-1 relative z-10">
+                                    {/* Top Row: Title & Arrow */}
                                     <div className="flex items-start justify-between gap-3">
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className={`text-sm font-serif font-bold leading-tight truncate transition-colors ${isActive ? 'text-[#f0f0f0]' : 'text-deep-ocean'}`}>
-                                                <span
-                                                    className={`inline-block w-6 font-mono font-normal text-[10px] mr-1 ${isActive ? 'text-time-gold' : 'text-faded-slate/60'}`}>
-                                                    {String(index + 1).padStart(2, '0')}
-                                                </span>
-                                                {item.content && item.content !== `Location (ID: ${item.id.slice(0, 8)}...)`
-                                                    ? item.content
-                                                    : item.fullData?.image_source || "Uncharted Fragment"}
+                                        <div className="flex-1 min-w-0 flex items-start gap-2">
+                                            {/* 序号 */}
+                                            <span className={`font-mono text-[10px] mt-1 ${isActive ? 'text-orange-400' : 'text-slate-300'}`}>
+                                                {String(index + 1).padStart(2, '0')}
+                                            </span>
+
+                                            {/* 标题 */}
+                                            <h4 className={`text-sm font-serif font-bold leading-tight line-clamp-2 ${isActive ? 'text-white' : 'text-slate-700'}`}>
+                                                {item.content || item.fullData?.image_source || "Uncharted Fragment"}
                                             </h4>
                                         </div>
+
+                                        {/* 箭头图标 */}
                                         <ArrowRight
                                             size={14}
-                                            className={`transition-all duration-300 shrink-0 mt-0.5
+                                            className={`transition-all duration-300 shrink-0 mt-1
                                                 ${isActive
-                                                ? 'text-time-gold translate-x-0 opacity-100'
-                                                : 'text-faded-slate -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}
+                                                ? 'text-orange-400 translate-x-0 opacity-100'
+                                                : 'text-slate-300 -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}
                                             `}
                                         />
                                     </div>
-                                    <div className="flex items-center justify-between mt-2 pl-7">
-                                        <div
-                                            className={`flex items-center gap-1.5 text-[10px] font-mono tracking-tight ${isActive ? 'text-white/40' : 'text-faded-slate/70'}`}>
-                                            <MapPin size={10}
-                                                    className={isActive ? 'text-time-gold/70' : 'text-faded-slate/50'}/>
-                                            <span>{formatCoord(item.lat, 'lat')} , {formatCoord(item.lon, 'lon')}</span>
+
+                                    {/* Bottom Row: Type, Coords, Score */}
+                                    <div className="flex items-center justify-between mt-3 pl-6">
+
+                                        {/* 左侧：类型与ID */}
+                                        <div className={`flex items-center gap-2 text-[10px] ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>
+                                            <div className="flex items-center gap-1" title={isDoc ? "Document" : "Map Tile"}>
+                                                <TypeIcon size={12} className={isActive ? 'text-orange-400' : isDoc ? 'text-orange-500' : 'text-blue-500'} />
+                                                <span className="font-mono uppercase tracking-tight">
+                                                    {isDoc ? "DOC" : "MAP"}
+                                                </span>
+                                            </div>
+                                            <span className="opacity-50">|</span>
+                                            <span className="font-mono truncate max-w-[60px]">
+                                                {item.id.slice(0, 6)}
+                                            </span>
                                         </div>
-                                        <div
-                                            className={`text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider border transition-colors ${isActive ? 'bg-time-gold/90 text-deep-ocean border-transparent' : score > 80 ? 'bg-stone-100 text-stone-600 border-stone-200' : 'text-transparent border-transparent'} `}>
-                                            {score}% Match
+
+                                        {/* 右侧：分数 */}
+                                        <div className={`
+                                            text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider border 
+                                            ${isActive 
+                                                ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' 
+                                                : 'bg-slate-100 text-slate-500 border-slate-200'} 
+                                        `}>
+                                            {score}%
                                         </div>
                                     </div>
                                 </div>
@@ -581,40 +605,184 @@ export function ResultsSidebar({results, onSelect, activeId}) {
                         );
                     })}
                 </div>
-            </Card>
+            </div>
 
-            {/* 🏷️ 侧边把手 (Toggle Handle) */}
+            {/* 🏷️ 侧边把手 (Toggle Handle) - 移到了卡片右侧外部 */}
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className={`
-                    absolute top-6 -right-8
-                    h-12 w-8
-                    bg-ceramic border-y border-r border-border/60
-                    rounded-r-lg shadow-md cursor-pointer
+                    absolute top-8 left-full ml-[-1px]
+                    h-16 w-6
+                    bg-[#fdfbf7] border-y border-r border-slate-300
+                    rounded-r-md shadow-lg cursor-pointer
                     flex items-center justify-center
-                    text-deep-ocean hover:text-time-gold hover:bg-stone-50
-                    transition-all duration-300 z-[-1]
+                    text-slate-500 hover:text-orange-600 hover:bg-white
+                    transition-all duration-300
                 `}
                 title={isCollapsed ? "Expand Results" : "Collapse Results"}
             >
-                {/* 图标：根据状态切换方向 */}
-                {isCollapsed ? <ChevronRight size={18}/> : <ChevronLeft size={18}/>}
+                {isCollapsed ? <ChevronRight size={16}/> : <ChevronLeft size={16}/>}
 
-                {/* 🔴 小红点提示：当折叠且有结果时显示 */}
+                {/* 🔴 小红点提示 */}
                 {isCollapsed && results.length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
-                        <span
-                            className="animate-ping absolute inline-flex h-full w-full rounded-full bg-time-gold opacity-75"></span>
-                        <span
-                            className="relative inline-flex rounded-full h-4 w-4 bg-time-gold text-deep-ocean text-[9px] font-bold items-center justify-center border border-white">
-                            {results.length > 9 ? '9+' : results.length}
-                        </span>
+                    <span className="absolute -top-1.5 -right-1.5 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
                     </span>
                 )}
             </button>
         </div>
     );
 }
+
+// export function ResultsSidebar({results, onSelect, activeId}) {
+//     // 控制折叠状态，默认展开
+//     const [isCollapsed, setIsCollapsed] = useState(false);
+//
+//     // 当有新结果搜索出来时，自动展开侧边栏
+//     useEffect(() => {
+//         if (results && results.length > 0) {
+//             setIsCollapsed(false);
+//         }
+//     }, [results]);
+//
+//     // 如果没有结果，完全不渲染
+//     if (!results || results.length === 0) return null;
+//
+//     // 辅助函数：格式化坐标
+//     const formatCoord = (val, type) => {
+//         if (!val) return '';
+//         const dir = type === 'lat' ? (val > 0 ? 'N' : 'S') : (val > 0 ? 'E' : 'W');
+//         return `${Math.abs(val).toFixed(3)}° ${dir}`;
+//     };
+//
+//     return (
+//         <div
+//             // ✨ 容器层：负责定位和动画
+//             className={`
+//                 absolute top-24 z-[900] h-[calc(100vh-140px)] flex items-start transition-transform duration-500 ease-in-out
+//                 ${isCollapsed ? '-translate-x-[calc(100%-12px)]' : 'translate-x-6'}
+//             `}
+//         >
+//             {/* 📜 侧边栏主体卡片 */}
+//             <Card
+//                 className="w-80 h-full bg-ceramic shadow-2xl shadow-deep-ocean/20 border border-border/60 rounded-xl overflow-hidden flex flex-col backdrop-blur-sm relative"
+//             >
+//                 {/* Header: 档案头 */}
+//                 <div
+//                     className="px-5 py-4 border-b border-border/40 bg-atlas-paper/50 backdrop-blur-md relative z-10 shrink-0">
+//                     <div className="flex items-end justify-between">
+//                         <h3 className="font-serif text-lg font-bold text-deep-ocean tracking-wide flex items-center gap-2">
+//                             <Library size={18} className="text-time-gold"/>
+//                             ARCHIVE INDEX
+//                         </h3>
+//                         {/* 移动端收起按钮 */}
+//                         <button
+//                             onClick={() => setIsCollapsed(true)}
+//                             className="text-faded-slate hover:text-deep-ocean transition-colors md:hidden"
+//                         >
+//                             <ChevronLeft size={16}/>
+//                         </button>
+//                     </div>
+//                     <span
+//                         className="text-[10px] text-faded-slate font-mono uppercase tracking-widest mt-1 block opacity-70">
+//                         VOL. {String(results.length).padStart(2, '0')}
+//                     </span>
+//                     {/* 装饰线条 */}
+//                     <div className="absolute bottom-0 left-0 right-0 h-[3px] border-t border-border/30"></div>
+//                 </div>
+//
+//                 {/* List Area */}
+//                 <div
+//                     className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar w-full p-2 space-y-1 bg-[#fdfbf7]">
+//                     {results.map((item, index) => {
+//                         const isActive = activeId === item.id;
+//                         const score = (item.score * 100).toFixed(0);
+//
+//                         return (
+//                             <div
+//                                 key={item.id}
+//                                 onClick={() => onSelect(item)}
+//                                 className={`
+//                                     group relative p-3 pl-4 cursor-pointer transition-all duration-300 rounded-lg border
+//                                     ${isActive
+//                                     ? 'bg-deep-ocean border-deep-ocean shadow-lg scale-[1.02] z-10'
+//                                     : 'bg-white border-transparent hover:border-border hover:bg-white hover:shadow-sm z-0'}
+//                                 `}
+//                             >
+//                                 <div className="flex flex-col gap-1 relative z-10">
+//                                     <div className="flex items-start justify-between gap-3">
+//                                         <div className="flex-1 min-w-0">
+//                                             <h4 className={`text-sm font-serif font-bold leading-tight truncate transition-colors ${isActive ? 'text-[#f0f0f0]' : 'text-deep-ocean'}`}>
+//                                                 <span
+//                                                     className={`inline-block w-6 font-mono font-normal text-[10px] mr-1 ${isActive ? 'text-time-gold' : 'text-faded-slate/60'}`}>
+//                                                     {String(index + 1).padStart(2, '0')}
+//                                                 </span>
+//                                                 {item.content && item.content !== `Location (ID: ${item.id.slice(0, 8)}...)`
+//                                                     ? item.content
+//                                                     : item.fullData?.image_source || "Uncharted Fragment"}
+//                                             </h4>
+//                                         </div>
+//                                         <ArrowRight
+//                                             size={14}
+//                                             className={`transition-all duration-300 shrink-0 mt-0.5
+//                                                 ${isActive
+//                                                 ? 'text-time-gold translate-x-0 opacity-100'
+//                                                 : 'text-faded-slate -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}
+//                                             `}
+//                                         />
+//                                     </div>
+//                                     <div className="flex items-center justify-between mt-2 pl-7">
+//                                         <div
+//                                             className={`flex items-center gap-1.5 text-[10px] font-mono tracking-tight ${isActive ? 'text-white/40' : 'text-faded-slate/70'}`}>
+//                                             <MapPin size={10}
+//                                                     className={isActive ? 'text-time-gold/70' : 'text-faded-slate/50'}/>
+//                                             <span>{formatCoord(item.lat, 'lat')} , {formatCoord(item.lon, 'lon')}</span>
+//                                         </div>
+//                                         <div
+//                                             className={`text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider border transition-colors ${isActive ? 'bg-time-gold/90 text-deep-ocean border-transparent' : score > 80 ? 'bg-stone-100 text-stone-600 border-stone-200' : 'text-transparent border-transparent'} `}>
+//                                             {score}% Match
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         );
+//                     })}
+//                 </div>
+//             </Card>
+//
+//             {/* 🏷️ 侧边把手 (Toggle Handle) */}
+//             <button
+//                 onClick={() => setIsCollapsed(!isCollapsed)}
+//                 className={`
+//                     absolute top-6 -right-8
+//                     h-12 w-8
+//                     bg-ceramic border-y border-r border-border/60
+//                     rounded-r-lg shadow-md cursor-pointer
+//                     flex items-center justify-center
+//                     text-deep-ocean hover:text-time-gold hover:bg-stone-50
+//                     transition-all duration-300 z-[-1]
+//                 `}
+//                 title={isCollapsed ? "Expand Results" : "Collapse Results"}
+//             >
+//                 {/* 图标：根据状态切换方向 */}
+//                 {isCollapsed ? <ChevronRight size={18}/> : <ChevronLeft size={18}/>}
+//
+//                 {/* 🔴 小红点提示：当折叠且有结果时显示 */}
+//                 {isCollapsed && results.length > 0 && (
+//                     <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
+//                         <span
+//                             className="animate-ping absolute inline-flex h-full w-full rounded-full bg-time-gold opacity-75"></span>
+//                         <span
+//                             className="relative inline-flex rounded-full h-4 w-4 bg-time-gold text-deep-ocean text-[9px] font-bold items-center justify-center border border-white">
+//                             {results.length > 9 ? '9+' : results.length}
+//                         </span>
+//                     </span>
+//                 )}
+//             </button>
+//         </div>
+//     );
+// }
 
 // 'use client';
 //
