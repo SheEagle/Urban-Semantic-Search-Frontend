@@ -1,587 +1,605 @@
+// // 'use client';
+// //
+// // import {useState, useEffect} from 'react';
+// // import {MapContainer, TileLayer, Marker, Popup, useMap} from 'react-leaflet';
+// // import L from 'leaflet';
+// // import HeatmapLayer from './HeatmapLayer';
+// // import 'leaflet/dist/leaflet.css';
+// //
+// // // 自定义 Marker 图标
+// // const customMarkerIcon = new L.Icon({
+// //     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+// //     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+// //     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+// //     iconSize: [25, 41],
+// //     iconAnchor: [12, 41],
+// //     popupAnchor: [1, -34],
+// //     shadowSize: [41, 41]
+// // });
+// //
+// // // 动画控制器
+// // const MapController = ({activeLocation}) => {
+// //     const map = useMap();
+// //     useEffect(() => {
+// //         if (activeLocation) {
+// //             map.flyTo(
+// //                 [activeLocation.lat, activeLocation.lon],
+// //                 16,
+// //                 {duration: 1.5, easeLinearity: 0.25}
+// //             );
+// //         }
+// //     }, [activeLocation, map]);
+// //     return null;
+// // };
+// //
+// // const DynamicMap = ({
+// //                         searchResults, showLayer1, showLayer2, showLayer3,
+// //                         opacity = 0.7, activeLocation, onMarkerClick
+// //                     }) => {
+// //     const [isMounted, setIsMounted] = useState(false);
+// //
+// //     useEffect(() => {
+// //         setIsMounted(true);
+// //     }, []);
+// //
+// //     if (!isMounted) {
+// //         return <div
+// //             className="h-screen w-screen bg-parchment flex items-center justify-center text-ink font-serif">Unfolding
+// //             Map...</div>;
+// //     }
+// //
+// //     const veniceCenter = [45.4371908, 12.3345898];
+// //     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
+// //
+// //     return (
+// //         <MapContainer
+// //             center={veniceCenter}
+// //             zoom={14}
+// //             scrollWheelZoom={true}
+// //             style={{height: '100vh', width: '100vw', background: '#f0f0f0'}}
+// //             className="z-0"
+// //         >
+// //             {/* 底图：使用 CartoDB Positron，因为它的颜色比较淡，容易和历史地图叠加 */}
+// //             {/*<TileLayer*/}
+// //             {/*    // attribution='&copy; <a href="https://carto.com/">CARTO</a>'*/}
+// //             {/*    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"*/}
+// //             {/*/>*/}
+// //             <TileLayer
+// //                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+// //                 className="vintage-map-tiles"
+// //             />
+// //
+// //             {/*<TileLayer*/}
+// //             {/*    url={L.tileLayer.provider('Stadia.StamenWatercolor').getTileUrl("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png")}*/}
+// //             {/*/>*/}
+// //
+// //             {/* 历史图层 */}
+// //             {showLayer1 && (
+// //                 <TileLayer
+// //                     url="/maps/venice/{z}/{x}/{y}.png"
+// //                     minZoom={12}
+// //                     maxZoom={16}
+// //                     tms={false}
+// //                     opacity={opacity}
+// //                 />
+// //             )}
+// //
+// //             {/* Marker 图层 */}
+// //             {showLayer2 && searchResults.map((result) => (
+// //                 <Marker
+// //                     key={result.id}
+// //                     position={[result.lat, result.lon]}
+// //                     icon={customMarkerIcon}
+// //                     eventHandlers={{
+// //                         click: () => onMarkerClick && onMarkerClick(result),
+// //                     }}
+// //                 >
+// //                     <Popup minWidth={220} maxWidth={300} className="parchment-popup">
+// //                         <div className="flex flex-col gap-3 p-1 font-serif text-ink">
+// //                             {/* 标题 */}
+// //                             <div>
+// //                                 <h3 className="font-bold text-base leading-tight mb-1">{result.fullData?.image_source || "Location"}</h3>
+// //                                 <div
+// //                                     className="flex justify-between items-center text-xs text-ink/60 border-t border-ink/10 pt-1 mt-1">
+// //                                     <span>Score: <span
+// //                                         className="font-bold text-wax-red">{result.score.toFixed(2)}</span></span>
+// //                                     <span className="font-mono">ID: {result.id.substring(0, 4)}</span>
+// //                                 </div>
+// //                             </div>
+// //
+// //                             {/* 图片切片 */}
+// //                             {result.pixel_coords && (
+// //                                 <div className="space-y-1">
+// //                                     <div
+// //                                         className="relative group rounded-sm overflow-hidden border border-ink/20 shadow-sm bg-paper">
+// //                                         <div
+// //                                             className="transition-transform duration-500 group-hover:scale-105 filter sepia-[0.3]"
+// //                                             style={{
+// //                                                 width: '100%',
+// //                                                 height: '140px',
+// //                                                 backgroundRepeat: 'no-repeat',
+// //                                                 backgroundImage: `url(${fullMapUrl})`,
+// //                                                 backgroundPosition: `-${result.pixel_coords[0]}px -${result.pixel_coords[1]}px`,
+// //                                             }}
+// //                                         />
+// //                                         <div
+// //                                             className="absolute bottom-0 inset-x-0 bg-ink/80 text-paper text-[9px] py-1 opacity-0 group-hover:opacity-100 transition-opacity text-center font-mono">
+// //                                             PX: {result.pixel_coords.join(',')}
+// //                                         </div>
+// //                                     </div>
+// //                                 </div>
+// //                             )}
+// //
+// //                             {/* 坐标 */}
+// //                             <div className="text-[9px] text-ink-faded font-mono text-right">
+// //                                 {result.lat.toFixed(5)}, {result.lon.toFixed(5)}
+// //                             </div>
+// //                         </div>
+// //                     </Popup>
+// //                 </Marker>
+// //             ))}
+// //
+// //             {showLayer3 && <HeatmapLayer points={searchResults}/>}
+// //             <MapController activeLocation={activeLocation}/>
+// //         </MapContainer>
+// //     );
+// // };
+// //
+// // export default DynamicMap;
+//
+// // 'use client';
+// //
+// // import {useState, useEffect} from 'react';
+// // import {MapContainer, TileLayer, Marker, Popup, useMap} from 'react-leaflet';
+// // import L from 'leaflet';
+// // import HeatmapLayer from './HeatmapLayer';
+// // import 'leaflet/dist/leaflet.css';
+// //
+// // // 自定义 Marker 图标
+// // const customMarkerIcon = new L.Icon({
+// //     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+// //     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+// //     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+// //     iconSize: [25, 41],
+// //     iconAnchor: [12, 41],
+// //     popupAnchor: [1, -34],
+// //     shadowSize: [41, 41]
+// // });
+// //
+// // // 动画控制器
+// // const MapController = ({activeLocation}) => {
+// //     const map = useMap();
+// //     useEffect(() => {
+// //         if (activeLocation) {
+// //             map.flyTo(
+// //                 [activeLocation.lat, activeLocation.lon],
+// //                 16,
+// //                 {duration: 1.5, easeLinearity: 0.25}
+// //             );
+// //         }
+// //     }, [activeLocation, map]);
+// //     return null;
+// // };
+// //
+// // const DynamicMap = ({
+// //                         searchResults, showLayer1, showLayer2, showLayer3,
+// //                         opacity = 0.7, activeLocation, onMarkerClick
+// //                     }) => {
+// //     const [isMounted, setIsMounted] = useState(false);
+// //
+// //     useEffect(() => {
+// //         setIsMounted(true);
+// //     }, []);
+// //
+// //     if (!isMounted) {
+// //         // 更新加载屏幕样式
+// //         return <div
+// //             className="h-screen w-screen bg-background flex items-center justify-center text-deep-ocean font-serif">Unfolding
+// //             Map...</div>;
+// //     }
+// //
+// //     const veniceCenter = [45.4371908, 12.3345898];
+// //     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
+// //
+// //     return (
+// //         <MapContainer
+// //             center={veniceCenter}
+// //             zoom={14}
+// //             scrollWheelZoom={true}
+// //             style={{height: '100vh', width: '100vw', background: '#f0f0f0'}}
+// //             className="z-0"
+// //         >
+// //             {/* 底图：使用新的滤镜类名 */}
+// //             <TileLayer
+// //                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+// //                 className="vintage-map-tiles"
+// //             />
+// //
+// //             {/* 历史图层 */}
+// //             {showLayer1 && (
+// //                 <TileLayer
+// //                     url="/maps/historical_1/{z}/{x}/{y}.png"
+// //                     minZoom={12}
+// //                     maxZoom={16}
+// //                     tms={false}
+// //                     opacity={opacity}
+// //                 />
+// //             )}
+// //
+// //             {/* Marker 图层 */}
+// //             {showLayer2 && searchResults.map((result) => (
+// //                 <Marker
+// //                     key={result.id}
+// //                     position={[result.lat, result.lon]}
+// //                     icon={customMarkerIcon}
+// //                     eventHandlers={{
+// //                         click: () => onMarkerClick && onMarkerClick(result),
+// //                     }}
+// //                 >
+// //                     {/* 移除原有的 parchment-popup 类名，依赖 globals.css 中对 Leaflet 弹窗的全局美化 */}
+// //                     <Popup minWidth={220} maxWidth={300}>
+// //                         {/* 更新弹窗内容颜色类名 */}
+// //                         <div className="flex flex-col gap-3 p-1 font-serif text-deep-ocean">
+// //                             {/* 标题 */}
+// //                             <div>
+// //                                 <h3 className="font-bold text-base leading-tight mb-1">{result.fullData?.image_source || "Location"}</h3>
+// //                                 <div
+// //                                     className="flex justify-between items-center text-xs text-faded-slate border-t border-border pt-1 mt-1">
+// //                                     <span>Score: <span
+// //                                         className="font-bold text-time-gold">{result.score.toFixed(2)}</span></span>
+// //                                     <span className="font-mono">ID: {result.id.substring(0, 4)}</span>
+// //                                 </div>
+// //                             </div>
+// //
+// //                             {/* 图片切片 */}
+// //                             {result.pixel_coords && (
+// //                                 <div className="space-y-1">
+// //                                     <div
+// //                                         className="relative group rounded-sm overflow-hidden border border-border shadow-sm bg-atlas-paper">
+// //                                         <div
+// //                                             className="transition-transform duration-500 group-hover:scale-105 filter sepia-[0.1]"
+// //                                             style={{
+// //                                                 width: '100%',
+// //                                                 height: '140px',
+// //                                                 backgroundRepeat: 'no-repeat',
+// //                                                 backgroundImage: `url(${fullMapUrl})`,
+// //                                                 backgroundPosition: `-${result.pixel_coords[0]}px -${result.pixel_coords[1]}px`,
+// //                                             }}
+// //                                         />
+// //                                         <div
+// //                                             className="absolute bottom-0 inset-x-0 bg-deep-ocean/80 text-atlas-paper text-[9px] py-1 opacity-0 group-hover:opacity-100 transition-opacity text-center font-mono">
+// //                                             PX: {result.pixel_coords.join(',')}
+// //                                         </div>
+// //                                     </div>
+// //                                 </div>
+// //                             )}
+// //
+// //                             {/* 坐标 */}
+// //                             <div className="text-[9px] text-faded-slate font-mono text-right">
+// //                                 {result.lat.toFixed(5)}, {result.lon.toFixed(5)}
+// //                             </div>
+// //                         </div>
+// //                     </Popup>
+// //                 </Marker>
+// //             ))}
+// //
+// //             {showLayer3 && <HeatmapLayer points={searchResults}/>}
+// //             <MapController activeLocation={activeLocation}/>
+// //         </MapContainer>
+// //     );
+// // };
+// //
+// // export default DynamicMap;
+//
 // 'use client';
 //
 // import {useState, useEffect} from 'react';
-// import {MapContainer, TileLayer, Marker, Popup, useMap} from 'react-leaflet';
 // import L from 'leaflet';
 // import HeatmapLayer from './HeatmapLayer';
 // import 'leaflet/dist/leaflet.css';
 //
-// // 自定义 Marker 图标
-// const customMarkerIcon = new L.Icon({
-//     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-//     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-//     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-//     iconSize: [25, 41],
-//     iconAnchor: [12, 41],
-//     popupAnchor: [1, -34],
-//     shadowSize: [41, 41]
-// });
 //
-// // 动画控制器
-// const MapController = ({activeLocation}) => {
-//     const map = useMap();
-//     useEffect(() => {
-//         if (activeLocation) {
-//             map.flyTo(
-//                 [activeLocation.lat, activeLocation.lon],
-//                 16,
-//                 {duration: 1.5, easeLinearity: 0.25}
-//             );
-//         }
-//     }, [activeLocation, map]);
-//     return null;
+// import {useRef, useMemo} from 'react';
+// import Map, {Source, Layer, Marker, Popup, NavigationControl, useMap} from 'react-map-gl/maplibre';
+// import DeckGLOverlay from './DeckGLOverlay'; // 稍后创建
+// import maplibregl from 'maplibre-gl';
+// import 'maplibre-gl/dist/maplibre-gl.css';
+// import {ScrollText, MapPin} from "lucide-react";
+//
+// // --- 1. 定义多地图源 URL ---
+// // MapLibre 的 raster source 需要 tiles 数组
+// const MAP_SOURCES = {
+//     'venice_1846': '/maps/historical_1/{z}/{x}/{y}.png',
+//     'venice_1900': '/maps/historical_2/{z}/{x}/{y}.png',
+//     'default': '/maps/historical_1/{z}/{x}/{y}.png'
 // };
 //
-// const DynamicMap = ({
-//                         searchResults, showLayer1, showLayer2, showLayer3,
-//                         opacity = 0.7, activeLocation, onMarkerClick
-//                     }) => {
-//     const [isMounted, setIsMounted] = useState(false);
-//
-//     useEffect(() => {
-//         setIsMounted(true);
-//     }, []);
-//
-//     if (!isMounted) {
-//         return <div
-//             className="h-screen w-screen bg-parchment flex items-center justify-center text-ink font-serif">Unfolding
-//             Map...</div>;
-//     }
-//
-//     const veniceCenter = [45.4371908, 12.3345898];
-//     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
-//
-//     return (
-//         <MapContainer
-//             center={veniceCenter}
-//             zoom={14}
-//             scrollWheelZoom={true}
-//             style={{height: '100vh', width: '100vw', background: '#f0f0f0'}}
-//             className="z-0"
-//         >
-//             {/* 底图：使用 CartoDB Positron，因为它的颜色比较淡，容易和历史地图叠加 */}
-//             {/*<TileLayer*/}
-//             {/*    // attribution='&copy; <a href="https://carto.com/">CARTO</a>'*/}
-//             {/*    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"*/}
-//             {/*/>*/}
-//             <TileLayer
-//                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-//                 className="vintage-map-tiles"
-//             />
-//
-//             {/*<TileLayer*/}
-//             {/*    url={L.tileLayer.provider('Stadia.StamenWatercolor').getTileUrl("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png")}*/}
-//             {/*/>*/}
-//
-//             {/* 历史图层 */}
-//             {showLayer1 && (
-//                 <TileLayer
-//                     url="/maps/venice/{z}/{x}/{y}.png"
-//                     minZoom={12}
-//                     maxZoom={16}
-//                     tms={false}
-//                     opacity={opacity}
-//                 />
-//             )}
-//
-//             {/* Marker 图层 */}
-//             {showLayer2 && searchResults.map((result) => (
-//                 <Marker
-//                     key={result.id}
-//                     position={[result.lat, result.lon]}
-//                     icon={customMarkerIcon}
-//                     eventHandlers={{
-//                         click: () => onMarkerClick && onMarkerClick(result),
-//                     }}
-//                 >
-//                     <Popup minWidth={220} maxWidth={300} className="parchment-popup">
-//                         <div className="flex flex-col gap-3 p-1 font-serif text-ink">
-//                             {/* 标题 */}
-//                             <div>
-//                                 <h3 className="font-bold text-base leading-tight mb-1">{result.fullData?.image_source || "Location"}</h3>
-//                                 <div
-//                                     className="flex justify-between items-center text-xs text-ink/60 border-t border-ink/10 pt-1 mt-1">
-//                                     <span>Score: <span
-//                                         className="font-bold text-wax-red">{result.score.toFixed(2)}</span></span>
-//                                     <span className="font-mono">ID: {result.id.substring(0, 4)}</span>
-//                                 </div>
-//                             </div>
-//
-//                             {/* 图片切片 */}
-//                             {result.pixel_coords && (
-//                                 <div className="space-y-1">
-//                                     <div
-//                                         className="relative group rounded-sm overflow-hidden border border-ink/20 shadow-sm bg-paper">
-//                                         <div
-//                                             className="transition-transform duration-500 group-hover:scale-105 filter sepia-[0.3]"
-//                                             style={{
-//                                                 width: '100%',
-//                                                 height: '140px',
-//                                                 backgroundRepeat: 'no-repeat',
-//                                                 backgroundImage: `url(${fullMapUrl})`,
-//                                                 backgroundPosition: `-${result.pixel_coords[0]}px -${result.pixel_coords[1]}px`,
-//                                             }}
-//                                         />
-//                                         <div
-//                                             className="absolute bottom-0 inset-x-0 bg-ink/80 text-paper text-[9px] py-1 opacity-0 group-hover:opacity-100 transition-opacity text-center font-mono">
-//                                             PX: {result.pixel_coords.join(',')}
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             )}
-//
-//                             {/* 坐标 */}
-//                             <div className="text-[9px] text-ink-faded font-mono text-right">
-//                                 {result.lat.toFixed(5)}, {result.lon.toFixed(5)}
-//                             </div>
-//                         </div>
-//                     </Popup>
-//                 </Marker>
-//             ))}
-//
-//             {showLayer3 && <HeatmapLayer points={searchResults}/>}
-//             <MapController activeLocation={activeLocation}/>
-//         </MapContainer>
-//     );
-// };
-//
-// export default DynamicMap;
-
-// 'use client';
-//
-// import {useState, useEffect} from 'react';
-// import {MapContainer, TileLayer, Marker, Popup, useMap} from 'react-leaflet';
-// import L from 'leaflet';
-// import HeatmapLayer from './HeatmapLayer';
-// import 'leaflet/dist/leaflet.css';
-//
-// // 自定义 Marker 图标
-// const customMarkerIcon = new L.Icon({
-//     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-//     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-//     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-//     iconSize: [25, 41],
-//     iconAnchor: [12, 41],
-//     popupAnchor: [1, -34],
-//     shadowSize: [41, 41]
-// });
-//
-// // 动画控制器
-// const MapController = ({activeLocation}) => {
-//     const map = useMap();
-//     useEffect(() => {
-//         if (activeLocation) {
-//             map.flyTo(
-//                 [activeLocation.lat, activeLocation.lon],
-//                 16,
-//                 {duration: 1.5, easeLinearity: 0.25}
-//             );
-//         }
-//     }, [activeLocation, map]);
-//     return null;
-// };
-//
-// const DynamicMap = ({
-//                         searchResults, showLayer1, showLayer2, showLayer3,
-//                         opacity = 0.7, activeLocation, onMarkerClick
-//                     }) => {
-//     const [isMounted, setIsMounted] = useState(false);
-//
-//     useEffect(() => {
-//         setIsMounted(true);
-//     }, []);
-//
-//     if (!isMounted) {
-//         // 更新加载屏幕样式
-//         return <div
-//             className="h-screen w-screen bg-background flex items-center justify-center text-deep-ocean font-serif">Unfolding
-//             Map...</div>;
-//     }
-//
-//     const veniceCenter = [45.4371908, 12.3345898];
-//     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
-//
-//     return (
-//         <MapContainer
-//             center={veniceCenter}
-//             zoom={14}
-//             scrollWheelZoom={true}
-//             style={{height: '100vh', width: '100vw', background: '#f0f0f0'}}
-//             className="z-0"
-//         >
-//             {/* 底图：使用新的滤镜类名 */}
-//             <TileLayer
-//                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-//                 className="vintage-map-tiles"
-//             />
-//
-//             {/* 历史图层 */}
-//             {showLayer1 && (
-//                 <TileLayer
-//                     url="/maps/historical_1/{z}/{x}/{y}.png"
-//                     minZoom={12}
-//                     maxZoom={16}
-//                     tms={false}
-//                     opacity={opacity}
-//                 />
-//             )}
-//
-//             {/* Marker 图层 */}
-//             {showLayer2 && searchResults.map((result) => (
-//                 <Marker
-//                     key={result.id}
-//                     position={[result.lat, result.lon]}
-//                     icon={customMarkerIcon}
-//                     eventHandlers={{
-//                         click: () => onMarkerClick && onMarkerClick(result),
-//                     }}
-//                 >
-//                     {/* 移除原有的 parchment-popup 类名，依赖 globals.css 中对 Leaflet 弹窗的全局美化 */}
-//                     <Popup minWidth={220} maxWidth={300}>
-//                         {/* 更新弹窗内容颜色类名 */}
-//                         <div className="flex flex-col gap-3 p-1 font-serif text-deep-ocean">
-//                             {/* 标题 */}
-//                             <div>
-//                                 <h3 className="font-bold text-base leading-tight mb-1">{result.fullData?.image_source || "Location"}</h3>
-//                                 <div
-//                                     className="flex justify-between items-center text-xs text-faded-slate border-t border-border pt-1 mt-1">
-//                                     <span>Score: <span
-//                                         className="font-bold text-time-gold">{result.score.toFixed(2)}</span></span>
-//                                     <span className="font-mono">ID: {result.id.substring(0, 4)}</span>
-//                                 </div>
-//                             </div>
-//
-//                             {/* 图片切片 */}
-//                             {result.pixel_coords && (
-//                                 <div className="space-y-1">
-//                                     <div
-//                                         className="relative group rounded-sm overflow-hidden border border-border shadow-sm bg-atlas-paper">
-//                                         <div
-//                                             className="transition-transform duration-500 group-hover:scale-105 filter sepia-[0.1]"
-//                                             style={{
-//                                                 width: '100%',
-//                                                 height: '140px',
-//                                                 backgroundRepeat: 'no-repeat',
-//                                                 backgroundImage: `url(${fullMapUrl})`,
-//                                                 backgroundPosition: `-${result.pixel_coords[0]}px -${result.pixel_coords[1]}px`,
-//                                             }}
-//                                         />
-//                                         <div
-//                                             className="absolute bottom-0 inset-x-0 bg-deep-ocean/80 text-atlas-paper text-[9px] py-1 opacity-0 group-hover:opacity-100 transition-opacity text-center font-mono">
-//                                             PX: {result.pixel_coords.join(',')}
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             )}
-//
-//                             {/* 坐标 */}
-//                             <div className="text-[9px] text-faded-slate font-mono text-right">
-//                                 {result.lat.toFixed(5)}, {result.lon.toFixed(5)}
-//                             </div>
-//                         </div>
-//                     </Popup>
-//                 </Marker>
-//             ))}
-//
-//             {showLayer3 && <HeatmapLayer points={searchResults}/>}
-//             <MapController activeLocation={activeLocation}/>
-//         </MapContainer>
-//     );
-// };
-//
-// export default DynamicMap;
-
-'use client';
-
-import {useState, useEffect} from 'react';
-import L from 'leaflet';
-import HeatmapLayer from './HeatmapLayer';
-import 'leaflet/dist/leaflet.css';
-
-// ✨ 新增：博物馆风格的自定义图标生成器
-// 使用 L.divIcon 允许我们要 HTML/CSS 绘制图标，从而完美匹配 Deep Ocean / Time Gold 配色
-// const createMuseumIcon = () => {
-//     return L.divIcon({
-//         className: 'bg-transparent', // 移除 Leaflet 默认的白色方块背景
-//         html: `
-//             <div class="relative flex flex-col items-center justify-center w-full h-full group hover:-translate-y-1 transition-transform duration-300">
-//                 <div class="absolute bottom-0 w-3 h-1 bg-black/30 blur-[1px] rounded-[50%]"></div>
-//
-//                 <div class="relative w-7 h-7 rounded-full bg-[var(--deep-ocean)] border-2 border-[var(--time-gold)] shadow-lg flex items-center justify-center z-10">
-//                     <div class="w-1.5 h-1.5 rounded-full bg-[var(--time-gold)]"></div>
-//                 </div>
-//
-//                 <div class="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[8px] border-t-[var(--deep-ocean)] -mt-[1px] z-0"></div>
-//             </div>
-//         `,
-//         iconSize: [30, 42],   // 图标总大小
-//         iconAnchor: [15, 40], // 锚点：让针尖对准坐标 (宽的一半, 高的高度)
-//         popupAnchor: [0, -40] // 弹窗位置：在图标上方
-//     });
-// };
-
-// ✨ 替换原来的 createMuseumIcon 函数
-// ✨ 优化版：更小巧、更有质感的珐琅图标
-// ✨ 最终修正版：提亮宝石色，确保肉眼能看出是蓝色
-// ✨ 高亮版：皇家蓝宝石风格，保证肉眼看是明亮的蓝色
-// ✨ 最终定稿版："深海浮标" 风格 (Deep Sea & White)
-// 抛弃橙色，改用白色边框；蓝色降调，改为沉稳的钢青色。
-// const createMuseumIcon = () => {
+// // --- 2. 自定义图标组件 (复用之前的 SVG 代码) ---
+// const MuseumPin = ({onClick}) => {
 //     const pinPath = "M15 0C6.71573 0 0 6.71573 0 15C0 25.5 15 40 15 40C15 40 30 25.5 30 15C30 6.71573 23.2843 0 15 0Z";
 //     const gradientId = "deepSeaGradient";
-//
-//     return L.divIcon({
-//         className: 'bg-transparent',
-//         html: `
-//             <div class="relative w-full h-full group hover:-translate-y-1 transition-transform duration-500 ease-out cursor-pointer">
-//
-//                 <svg width="24" height="34" viewBox="0 0 30 42" class="absolute top-0.5 left-0 opacity-20 blur-[1.5px]">
-//                     <path d="${pinPath}" fill="black" />
-//                 </svg>
-//
-//                 <svg width="24" height="34" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="relative z-10 drop-shadow-md">
-//
-//                     <defs>
-//                         <linearGradient id="${gradientId}" x1="15" y1="0" x2="15" y2="40" gradientUnits="userSpaceOnUse">
-//                             <stop offset="0%" stop-color="#5B7C99" />
-//                             <stop offset="100%" stop-color="#2A4359" />
-//                         </linearGradient>
-//                     </defs>
-//
-//                     <path d="${pinPath}" fill="url(#${gradientId})" stroke="white" stroke-width="2"/>
-//
-//                     <circle cx="15" cy="15" r="7" stroke="white" stroke-opacity="0.3" stroke-width="1"/>
-//
-//                     <circle cx="15" cy="15" r="3" fill="white"/>
-//
-//                 </svg>
-//             </div>
-//         `,
-//         iconSize: [24, 34],
-//         iconAnchor: [12, 34],
-//         popupAnchor: [0, -36]
-//     });
+//     return (
+//         <div
+//             onClick={onClick}
+//             className="relative w-full h-full group hover:-translate-y-1 transition-transform duration-500 ease-out cursor-pointer"
+//             style={{width: '24px', height: '34px'}}
+//         >
+//             {/* 阴影 */}
+//             <svg width="24" height="34" viewBox="0 0 30 42" className="absolute top-0.5 left-0 opacity-20 blur-[1.5px]">
+//                 <path d={pinPath} fill="black"/>
+//             </svg>
+//             {/* 本体 */}
+//             <svg width="24" height="34" viewBox="0 0 30 40" fill="none" className="relative z-10 drop-shadow-md">
+//                 <defs>
+//                     <linearGradient id={gradientId} x1="15" y1="0" x2="15" y2="40" gradientUnits="userSpaceOnUse">
+//                         <stop offset="0%" stopColor="#5B7C99"/>
+//                         <stop offset="100%" stopColor="#2A4359"/>
+//                     </linearGradient>
+//                 </defs>
+//                 <path d={pinPath} fill={`url(#${gradientId})`} stroke="white" strokeWidth="2"/>
+//                 <circle cx="15" cy="15" r="7" stroke="white" strokeOpacity="0.3" strokeWidth="1"/>
+//                 <circle cx="15" cy="15" r="3" fill="white"/>
+//             </svg>
+//         </div>
+//     );
 // };
-// // const createMuseumIcon = () => {
-// //     // 定义 SVG 路径：这是一个完美的水滴形/定位针形状
-// //     const pinPath = "M15 0C6.71573 0 0 6.71573 0 15C0 25.5 15 40 15 40C15 40 30 25.5 30 15C30 6.71573 23.2843 0 15 0Z";
-// //
-// //     return L.divIcon({
-// //         className: 'bg-transparent', // 清除默认背景
-// //         html: `
-// //             <div class="relative w-full h-full group hover:-translate-y-2 transition-transform duration-500 ease-out cursor-pointer">
-// //                 <svg width="30" height="42" viewBox="0 0 30 42" class="absolute top-1 left-0 opacity-40 blur-[2px] transition-opacity group-hover:opacity-20">
-// //                     <path d="${pinPath}" fill="black" />
-// //                 </svg>
-// //
-// //                 <svg width="30" height="40" viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="relative z-10 drop-shadow-md">
-// //                     <path d="${pinPath}" fill="var(--deep-ocean)" stroke="var(--time-gold)" stroke-width="1.5"/>
-// //
-// //                     <circle cx="15" cy="15" r="8" stroke="white" stroke-opacity="0.2" stroke-width="1"/>
-// //                     <circle cx="15" cy="15" r="4" fill="var(--time-gold)"/>
-// //                     <circle cx="16.5" cy="13.5" r="1.5" fill="white" fill-opacity="0.4"/>
-// //                 </svg>
-// //             </div>
-// //         `,
-// //         iconSize: [30, 42],    // 尺寸
-// //         iconAnchor: [15, 42],  // 📍 锚点：X轴居中(15), Y轴最底部(42) - 针尖对准坐标
-// //         popupAnchor: [0, -45]  // 💬 弹窗位置：在针尖上方 45px 处
-// //     });
-// // };
 //
-// // 动画控制器
-// const MapController = ({activeLocation}) => {
-//     const map = useMap();
+// // --- 3. 动画控制器 ---
+// // React Map GL 通过 ref 控制，但为了保持兼容性，我们可以用 useEffect 监听 activeLocation
+// const MapController = ({activeLocation, mapRef}) => {
 //     useEffect(() => {
-//         if (activeLocation) {
-//             map.flyTo(
-//                 [activeLocation.lat, activeLocation.lon],
-//                 16,
-//                 {duration: 1.5, easeLinearity: 0.25}
-//             );
+//         if (activeLocation && mapRef.current) {
+//             mapRef.current.flyTo({
+//                 center: [activeLocation.lon, activeLocation.lat],
+//                 zoom: 16,
+//                 pitch: 45, // 🔥 飞过去的时候自动倾斜，展示3D效果
+//                 bearing: 0,
+//                 duration: 2000,
+//                 essential: true
+//             });
 //         }
-//     }, [activeLocation, map]);
+//     }, [activeLocation, mapRef]);
 //     return null;
 // };
 //
-// const MAP_URLS = {
-//     'venice_1846': '/maps/historical_1/{z}/{x}/{y}.png',
-//     'venice_1900': '/maps/historical_2/{z}/{x}/{y}.png', // 假设你有第二套
-//     // ...
-// };
-//
+// // --- 4. 主组件 ---
 // const DynamicMap = ({
 //                         searchResults,
-//                         showLayer1, // 是否显示历史图层
-//                         showLayer2, // 是否显示 Pins (修复报错的关键：必须解构出来)
-//                         showLayer3, // 是否显示热力图
-//                         opacity = 0.7,
-//                         activeLocation,
-//                         onMarkerClick,
-//                         mapId // 当前选中的地图 ID
+//                         showLayer1, showLayer2, showLayer3, opacity = 0.7,
+//                         activeLocation, onMarkerClick, mapId,
+//                         // 3D 热力图相关
+//                         show3DHeatmap, heatmapData
 //                     }) => {
-//     const [isMounted, setIsMounted] = useState(false);
+//     const mapRef = useRef(null);
+//     const [viewState, setViewState] = useState({
+//         longitude: 12.3345,
+//         latitude: 45.4371,
+//         zoom: 13,
+//         pitch: 0, // 初始 0，用户可以右键旋转
+//         bearing: 0
+//     });
 //
-//     useEffect(() => {
-//         setIsMounted(true);
-//     }, []);
+//     const [selectedMarker, setSelectedMarker] = useState(null);
 //
-//     if (!isMounted) {
-//         return <div
-//             className="h-screen w-screen bg-background flex items-center justify-center text-deep-ocean font-serif">Unfolding
-//             Map...</div>;
-//     }
-//
-//     const veniceCenter = [45.4371908, 12.3345898];
+//     // 计算历史地图 URL
+//     const activeTileUrl = MAP_SOURCES[mapId] || MAP_SOURCES['default'];
 //     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
 //
-//     // 创建图标实例 (为了性能，可以在组件外或用 useMemo 创建，但在这里直接调用也无妨)
-//     const museumIcon = createMuseumIcon();
-//
-//     const activeTileUrl = MAP_URLS[mapId] || '/maps/historical_1/{z}/{x}/{y}.png';
+//     // 构建底图样式对象 (Style JSON)
+//     // MapLibre 需要一个完整的 Style JSON，我们这里手动构建一个简单的只包含 CartoDB 的样式
+//     const mapStyle = useMemo(() => ({
+//         version: 8,
+//         sources: {
+//             // 底图源：CartoDB Light
+//             'carto-light': {
+//                 type: 'raster',
+//                 tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
+//                 tileSize: 256,
+//                 attribution: '&copy; CartoDB'
+//             },
+//             // 历史地图源
+//             'historical-map': {
+//                 type: 'raster',
+//                 tiles: [activeTileUrl], // 动态 URL
+//                 tileSize: 256,
+//                 scheme: 'xyz'
+//             }
+//         },
+//         layers: [
+//             // 底图层
+//             {
+//                 id: 'carto-layer',
+//                 type: 'raster',
+//                 source: 'carto-light',
+//                 paint: {'raster-opacity': 1}
+//             },
+//             // 历史地图层 (只有当 showLayer1 为 true 时才在数组里)
+//             ...(showLayer1 && mapId ? [{
+//                 id: 'historical-layer',
+//                 type: 'raster',
+//                 source: 'historical-map',
+//                 paint: {
+//                     'raster-opacity': opacity, // 动态透明度
+//                     'raster-fade-duration': 300
+//                 }
+//             }] : [])
+//         ]
+//     }), [activeTileUrl, showLayer1, mapId, opacity]);
 //
 //     return (
-//         <MapContainer
-//             center={veniceCenter}
-//             zoom={14}
-//             scrollWheelZoom={true}
-//             style={{height: '100vh', width: '100vw', background: '#f0f0f0'}}
-//             className="z-0"
-//         >
-//             {/* 底图 */}
-//             <TileLayer
-//                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-//                 className="vintage-map-tiles"
-//             />
+//         <div className="w-screen h-screen bg-[#f0f0f0]">
+//             <Map
+//                 ref={mapRef}
+//                 {...viewState}
+//                 onMove={evt => setViewState(evt.viewState)}
+//                 style={{width: '100%', height: '100%'}}
+//                 mapStyle={mapStyle} // 注入样式
+//                 mapLib={maplibregl} // 指定使用 maplibre
+//                 minZoom={2}
+//                 maxZoom={20}
+//                 // 开启所有交互
+//                 dragRotate={true}
+//                 touchZoomRotate={true}
+//             >
+//                 {/* 导航控件 (右上角) */}
+//                 <NavigationControl position="top-right" showCompass={true} visualizePitch={true}/>
+//
+//                 {/* --- DeckGL 3D 热力图层 (作为 Overlay) --- */}
+//                 {show3DHeatmap && (
+//                     <DeckGLOverlay
+//                         data={heatmapData}
+//                         visible={show3DHeatmap}
+//                     />
+//                 )}
+//
+//                 {/* --- Markers (React Map GL 原生 Marker) --- */}
+//                 {/*{showLayer2 && searchResults.map((result) => (*/}
+//                 {/*    <Marker*/}
+//                 {/*        key={result.id}*/}
+//                 {/*        longitude={result.lon}*/}
+//                 {/*        latitude={result.lat}*/}
+//                 {/*        anchor="bottom" // 锚点在底部*/}
+//                 {/*        onClick={e => {*/}
+//                 {/*            // 阻止冒泡，防止点击地图关闭 Popup*/}
+//                 {/*            e.originalEvent.stopPropagation();*/}
+//                 {/*            onMarkerClick && onMarkerClick(result);*/}
+//                 {/*            setSelectedMarker(result);*/}
+//                 {/*        }}*/}
+//                 {/*    >*/}
+//                 {/*        <MuseumPin/>*/}
+//                 {/*    </Marker>*/}
+//                 {/*))}*/}
 //
 //
-//             {showLayer1 && mapId && (
-//                 <TileLayer
-//                     key={mapId} // 🔥 关键：加 Key 强制 React 在切换地图时重新渲染 Layer
-//                     url={activeTileUrl}
-//                     minZoom={12} maxZoom={16} tms={false}
-//                     opacity={opacity}
-//                 />
-//             )}
+//                 {/* 渲染 Markers */}
+//                 {showLayer2 && !show3DHeatmap && searchResults.map(res => {
+//                     // 判断类型
+//                     const isDoc = res.fullData?.type === 'document' || res.type === 'document';
+//                     const isActive = activeLocation?.id === res.id;
 //
-//             {/* Marker 图层 */}
-//             {showLayer2 && searchResults.map((result) => (
-//                 <Marker
-//                     key={result.id}
-//                     position={[result.lat, result.lon]}
-//                     icon={museumIcon} // ✨ 使用新的 CSS 图标
-//                     eventHandlers={{
-//                         click: () => onMarkerClick && onMarkerClick(result),
-//                     }}
-//                 >
-//                     <Popup minWidth={220} maxWidth={300}>
-//                         <div className="flex flex-col gap-3 p-1 font-serif text-deep-ocean">
-//                             {/* 标题 */}
+//                     return (
+//                         <Marker
+//                             key={res.id}
+//                             longitude={res.lon}
+//                             latitude={res.lat}
+//                             anchor="bottom"
+//                             onClick={(e) => {
+//                                 e.originalEvent.stopPropagation(); // 防止点击穿透到底图
+//                                 onMarkerClick(res);
+//                             }}
+//                         >
+//                             <div className={`
+//                             group cursor-pointer transform transition-all duration-300
+//                             ${isActive ? 'scale-125 z-50' : 'hover:scale-110 z-10'}
+//                         `}>
+//                                 {isDoc ? (
+//                                     // --- 文档图标 (金色/橙色) ---
+//                                     <div className={`
+//                                     p-1.5 rounded-full shadow-lg border-2
+//                                     ${isActive ? 'bg-orange-500 border-white' : 'bg-white border-orange-500'}
+//                                 `}>
+//                                         <ScrollText
+//                                             size={18}
+//                                             className={isActive ? 'text-white' : 'text-orange-600'}
+//                                         />
+//                                     </div>
+//                                 ) : (
+//                                     // --- 地图图标 (深蓝色) ---
+//                                     <div className={`
+//                                     p-1.5 rounded-full shadow-lg border-2
+//                                     ${isActive ? 'bg-blue-600 border-white' : 'bg-white border-blue-600'}
+//                                 `}>
+//                                         <MapPin
+//                                             size={18}
+//                                             className={isActive ? 'text-white' : 'text-blue-700'}
+//                                         />
+//                                     </div>
+//                                 )}
+//
+//                                 {/* 简单的 Tooltip (鼠标悬停显示标题) */}
+//                                 <div
+//                                     className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+//                                     {isDoc ? "📜 Document" : "🗺️ Map Tile"}
+//                                 </div>
+//                             </div>
+//                         </Marker>
+//                     );
+//                 })}
+//
+//                 {/* --- Popup (弹窗) --- */}
+//                 {selectedMarker && (
+//                     <Popup
+//                         longitude={selectedMarker.lon}
+//                         latitude={selectedMarker.lat}
+//                         anchor="bottom"
+//                         offset={40} // 向上偏移避开 Pin
+//                         onClose={() => setSelectedMarker(null)}
+//                         closeButton={false} // 使用自定义样式，不要默认的叉
+//                         className="museum-popup" // 可以在 globals.css 自定义样式
+//                     >
+//                         {/* 弹窗内容 (完全复用之前的) */}
+//                         <div className="flex flex-col gap-3 p-2 font-serif text-deep-ocean w-56">
 //                             <div>
-//                                 <h3 className="font-bold text-base leading-tight mb-1">{result.fullData?.image_source || "Location"}</h3>
+//                                 <h3 className="font-bold text-base leading-tight mb-1">{selectedMarker.fullData?.image_source || "Location"}</h3>
 //                                 <div
 //                                     className="flex justify-between items-center text-xs text-faded-slate border-t border-border pt-1 mt-1">
 //                                     <span>Score: <span
-//                                         className="font-bold text-time-gold">{result.score.toFixed(2)}</span></span>
-//                                     <span className="font-mono">ID: {result.id.substring(0, 4)}</span>
+//                                         className="font-bold text-time-gold">{selectedMarker.score.toFixed(2)}</span></span>
+//                                     <span className="font-mono">ID: {selectedMarker.id.substring(0, 4)}</span>
 //                                 </div>
 //                             </div>
-//
-//                             {/* 图片切片 */}
-//                             {result.pixel_coords && (
+//                             {selectedMarker.pixel_coords && (
 //                                 <div className="space-y-1">
 //                                     <div
-//                                         className="relative group rounded-sm overflow-hidden border border-border shadow-sm bg-atlas-paper">
+//                                         className="relative group rounded-sm overflow-hidden border border-border shadow-sm bg-atlas-paper h-28">
 //                                         <div
-//                                             className="transition-transform duration-500 group-hover:scale-105 filter sepia-[0.1]"
+//                                             className="w-full h-full transition-transform duration-500 group-hover:scale-105 filter sepia-[0.1]"
 //                                             style={{
-//                                                 width: '100%',
-//                                                 height: '140px',
 //                                                 backgroundRepeat: 'no-repeat',
 //                                                 backgroundImage: `url(${fullMapUrl})`,
-//                                                 backgroundPosition: `-${result.pixel_coords[0]}px -${result.pixel_coords[1]}px`,
+//                                                 backgroundPosition: `-${selectedMarker.pixel_coords[0]}px -${selectedMarker.pixel_coords[1]}px`,
 //                                             }}
 //                                         />
-//                                         <div
-//                                             className="absolute bottom-0 inset-x-0 bg-deep-ocean/80 text-atlas-paper text-[9px] py-1 opacity-0 group-hover:opacity-100 transition-opacity text-center font-mono">
-//                                             PX: {result.pixel_coords.join(',')}
-//                                         </div>
 //                                     </div>
 //                                 </div>
 //                             )}
-//
-//                             {/* 坐标 */}
-//                             <div className="text-[9px] text-faded-slate font-mono text-right">
-//                                 {result.lat.toFixed(5)}, {result.lon.toFixed(5)}
-//                             </div>
 //                         </div>
 //                     </Popup>
-//                 </Marker>
-//             ))}
+//                 )}
 //
-//             {showLayer3 && <HeatmapLayer points={searchResults}/>}
-//             <MapController activeLocation={activeLocation}/>
-//         </MapContainer>
+//                 {/* 逻辑控制器 */}
+//                 <MapController activeLocation={activeLocation} mapRef={mapRef}/>
+//             </Map>
+//         </div>
 //     );
 // };
 //
 // export default DynamicMap;
+'use client';
 
-
-import {useRef, useMemo} from 'react';
-import Map, {Source, Layer, Marker, Popup, NavigationControl, useMap} from 'react-map-gl/maplibre';
-import DeckGLOverlay from './DeckGLOverlay'; // 稍后创建
+import {useState, useEffect, useRef, useMemo} from 'react';
+import Map, {Marker, Popup, NavigationControl} from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {ScrollText, MapPin} from "lucide-react";
 
+// 🔥 引入 DeckGL 相关
+import DeckGLOverlay from './DeckGLOverlay';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 // --- 1. 定义多地图源 URL ---
-// MapLibre 的 raster source 需要 tiles 数组
 const MAP_SOURCES = {
-    'venice_1846': '/maps/historical_1/{z}/{x}/{y}.png',
-    'venice_1900': '/maps/historical_2/{z}/{x}/{y}.png',
-    'default': '/maps/historical_1/{z}/{x}/{y}.png'
+    'venice_1846': '/maps/web_tiles_1/{z}/{x}/{y}.png',
+    'default': '/maps/web_tiles_1/{z}/{x}/{y}.png'
 };
 
-// --- 2. 自定义图标组件 (复用之前的 SVG 代码) ---
-const MuseumPin = ({onClick}) => {
-    const pinPath = "M15 0C6.71573 0 0 6.71573 0 15C0 25.5 15 40 15 40C15 40 30 25.5 30 15C30 6.71573 23.2843 0 15 0Z";
-    const gradientId = "deepSeaGradient";
-    return (
-        <div
-            onClick={onClick}
-            className="relative w-full h-full group hover:-translate-y-1 transition-transform duration-500 ease-out cursor-pointer"
-            style={{width: '24px', height: '34px'}}
-        >
-            {/* 阴影 */}
-            <svg width="24" height="34" viewBox="0 0 30 42" className="absolute top-0.5 left-0 opacity-20 blur-[1.5px]">
-                <path d={pinPath} fill="black"/>
-            </svg>
-            {/* 本体 */}
-            <svg width="24" height="34" viewBox="0 0 30 40" fill="none" className="relative z-10 drop-shadow-md">
-                <defs>
-                    <linearGradient id={gradientId} x1="15" y1="0" x2="15" y2="40" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stopColor="#5B7C99"/>
-                        <stop offset="100%" stopColor="#2A4359"/>
-                    </linearGradient>
-                </defs>
-                <path d={pinPath} fill={`url(#${gradientId})`} stroke="white" strokeWidth="2"/>
-                <circle cx="15" cy="15" r="7" stroke="white" strokeOpacity="0.3" strokeWidth="1"/>
-                <circle cx="15" cy="15" r="3" fill="white"/>
-            </svg>
-        </div>
-    );
-};
-
-// --- 3. 动画控制器 ---
-// React Map GL 通过 ref 控制，但为了保持兼容性，我们可以用 useEffect 监听 activeLocation
+// --- 2. 动画控制器 ---
 const MapController = ({activeLocation, mapRef}) => {
     useEffect(() => {
         if (activeLocation && mapRef.current) {
             mapRef.current.flyTo({
                 center: [activeLocation.lon, activeLocation.lat],
                 zoom: 16,
-                pitch: 45, // 🔥 飞过去的时候自动倾斜，展示3D效果
+                pitch: 50, // 飞向目标时也保持倾斜
                 bearing: 0,
                 duration: 2000,
                 essential: true
@@ -591,12 +609,64 @@ const MapController = ({activeLocation, mapRef}) => {
     return null;
 };
 
-// --- 4. 主组件 ---
+// 🎨 修改 1: 定义新色系 (暖色系: 浅黄 -> 橙 -> 深红)
+// 这种单色系渐变看起来更像"数据可视化"，而不是"霓虹灯"
+// const HEATMAP_COLOR_RANGE = [
+//     [255, 255, 212], // 极浅黄 (Low)
+//     [254, 217, 142], // 浅橙
+//     [254, 153, 41],  // 橙
+//     [217, 95, 14],   // 深橙
+//     [153, 52, 4]     // 褐红 (High)
+// ];
+
+// 🎨 修改: 极致单色系 (Monochromatic Orange)
+// 这种风格非常像建筑模型，干净、高级
+const HEATMAP_COLOR_RANGE = [
+    [255, 247, 237], // 极浅 (几乎透明)
+    [254, 232, 200],
+    [253, 212, 158],
+    [253, 187, 132],
+    [252, 141, 89],
+    [239, 101, 72],
+    [215, 48, 31],
+    [153, 0, 0]      // 极深 (最热)
+];
+
+// 图例组件 (自动适配上面的颜色)
+const HeatmapLegend = () => {
+    const gradient = `linear-gradient(to right, ${
+        HEATMAP_COLOR_RANGE.map(c => `rgb(${c.join(',')})`).join(',')
+    })`;
+
+    return (
+        <div
+            className="absolute bottom-32 right-4 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl shadow-xl border border-white/50 z-[400] w-48 animate-in fade-in slide-in-from-right-8 duration-700">
+            <div className="flex items-center gap-2 mb-2">
+                {/* 小圆点换成深橙色 */}
+                <div className="w-2 h-2 rounded-full bg-[#ef6548] animate-pulse"></div>
+                <span className="text-[10px] font-bold text-slate-800 uppercase tracking-widest">
+                    Intensity
+                </span>
+            </div>
+
+            {/* 渐变条 */}
+            <div className="h-2 w-full rounded-full shadow-inner mb-1" style={{background: gradient}}/>
+
+            <div className="flex justify-between text-[9px] text-slate-400 font-mono font-medium">
+                <span>Low</span>
+                <span>High</span>
+            </div>
+        </div>
+    );
+};
+
+
+// --- 3. 主组件 ---
 const DynamicMap = ({
                         searchResults,
-                        showLayer1, showLayer2, showLayer3, opacity = 0.7,
+                        showLayer1, showLayer2, showLayer3, opacity = 70, // 1. 给一个默认值 70 (0-100 scale),
                         activeLocation, onMarkerClick, mapId,
-                        // 3D 热力图相关
+                        // 3D 热力图相关 props
                         show3DHeatmap, heatmapData
                     }) => {
     const mapRef = useRef(null);
@@ -604,56 +674,234 @@ const DynamicMap = ({
         longitude: 12.3345,
         latitude: 45.4371,
         zoom: 13,
-        pitch: 0, // 初始 0，用户可以右键旋转
+        pitch: 0,
         bearing: 0
     });
 
     const [selectedMarker, setSelectedMarker] = useState(null);
-
-    // 计算历史地图 URL
     const activeTileUrl = MAP_SOURCES[mapId] || MAP_SOURCES['default'];
     const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
 
-    // 构建底图样式对象 (Style JSON)
-    // MapLibre 需要一个完整的 Style JSON，我们这里手动构建一个简单的只包含 CartoDB 的样式
+    // --- 🔥 核心逻辑：自动倾斜视角 (Auto Tilt) ---
+    // 当切换 3D 模式时，自动调整视角 pitch
+    useEffect(() => {
+        const map = mapRef.current?.getMap();
+        if (map) {
+            if (show3DHeatmap) {
+                // 开启 3D：倾斜 50 度，稍微旋转一点角度更有立体感
+                map.easeTo({pitch: 50, bearing: 10, duration: 1000});
+            } else {
+                // 关闭 3D：恢复俯视
+                map.easeTo({pitch: 0, bearing: 0, duration: 1000});
+            }
+        }
+    }, [show3DHeatmap]);
+
+    // const safeOpacity = useMemo(() => {
+    //     let val = opacity;
+    //     // 如果意外传入了数组 [70]
+    //     if (Array.isArray(val)) val = val[0];
+    //     // 确保是数字
+    //     val = Number(val);
+    //     // 如果是 NaN，回退到 70
+    //     if (isNaN(val)) val = 70;
+    //     // 限制范围 0-100
+    //     val = Math.min(100, Math.max(0, val));
+    //
+    //     return val / 100; // 转为 MapLibre 需要的 0.0 - 1.0
+    // }, [opacity]);
+
+    // 1. 计算 safeOpacity (保持原样)
+    const safeOpacity = useMemo(() => {
+        let val = opacity;
+        if (Array.isArray(val)) val = val[0];
+        val = Number(val);
+        if (isNaN(val)) val = 70;
+        val = Math.min(100, Math.max(0, val));
+        return val / 100;
+    }, [opacity]);
+
+    // 🔥【新增】: 专门用于实时更新透明度的 Effect
+    // 这比更新整个 mapStyle 更快、更流畅，且不会导致瓦片重载
+    useEffect(() => {
+        const map = mapRef.current?.getMap();
+        // 确保地图已加载且图层存在
+        if (map && map.getLayer('historical-layer')) {
+            map.setPaintProperty('historical-layer', 'raster-opacity', safeOpacity);
+        }
+    }, [safeOpacity, mapRef]); // 只要 safeOpacity 变了，就执行
+
+    // const mapStyle = useMemo(() => ({
+    //     version: 8,
+    //     sources: {
+    //         'carto-light': {
+    //             type: 'raster',
+    //             tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
+    //             tileSize: 256,
+    //             attribution: '&copy; CartoDB'
+    //         },
+    //         'historical-map': {
+    //             type: 'raster',
+    //             tiles: [activeTileUrl],
+    //             tileSize: 256,
+    //             scheme: 'xyz'
+    //         }
+    //     },
+    //     layers: [
+    //         {
+    //             id: 'carto-layer',
+    //             type: 'raster',
+    //             source: 'carto-light',
+    //             paint: {'raster-opacity': 1}
+    //         },
+    //         // 🔥 修复点 2: 只有当 mapId 存在且 showLayer1 为 true 时才渲染
+    //         ...(showLayer1 && mapId ? [{
+    //             id: 'historical-layer',
+    //             type: 'raster',
+    //             source: 'historical-map',
+    //             paint: {
+    //                 'raster-opacity': safeOpacity, // 使用计算好的安全透明度
+    //                 'raster-fade-duration': 100     // 减少过渡时间，让调节更跟手
+    //             }
+    //         }] : [])
+    //     ]
+    // }), [activeTileUrl, showLayer1, mapId, safeOpacity]); // 依赖 safeOpacity
     const mapStyle = useMemo(() => ({
         version: 8,
         sources: {
-            // 底图源：CartoDB Light
             'carto-light': {
                 type: 'raster',
                 tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
                 tileSize: 256,
                 attribution: '&copy; CartoDB'
             },
-            // 历史地图源
             'historical-map': {
                 type: 'raster',
-                tiles: [activeTileUrl], // 动态 URL
+                tiles: [activeTileUrl],
                 tileSize: 256,
                 scheme: 'xyz'
             }
         },
         layers: [
-            // 底图层
             {
                 id: 'carto-layer',
                 type: 'raster',
                 source: 'carto-light',
                 paint: {'raster-opacity': 1}
             },
-            // 历史地图层 (只有当 showLayer1 为 true 时才在数组里)
+            // 历史地图层
             ...(showLayer1 && mapId ? [{
                 id: 'historical-layer',
                 type: 'raster',
                 source: 'historical-map',
                 paint: {
-                    'raster-opacity': opacity, // 动态透明度
-                    'raster-fade-duration': 300
+                    // 这里虽然写了 safeOpacity，但实际上由上面的 useEffect 接管控制
+                    // 初始渲染用 safeOpacity，后续更新用 setPaintProperty
+                    'raster-opacity': safeOpacity,
+                    'raster-fade-duration': 0 // 设为 0 可以让滑动更跟手
                 }
             }] : [])
         ]
-    }), [activeTileUrl, showLayer1, mapId, opacity]);
+        // 🔥【关键修改】: 下面的依赖数组里去掉了 safeOpacity
+        // 这样拖动滑块时，mapStyle 对象不会变，就不会触发重绘，只触发上面的 setPaintProperty
+    }), [activeTileUrl, showLayer1, mapId]);
+
+
+    // const mapStyle = useMemo(() => ({
+    //     version: 8,
+    //     sources: {
+    //         'carto-light': {
+    //             type: 'raster',
+    //             tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
+    //             tileSize: 256,
+    //             attribution: '&copy; CartoDB'
+    //         },
+    //         'historical-map': {
+    //             type: 'raster',
+    //             tiles: [activeTileUrl],
+    //             tileSize: 256,
+    //             scheme: 'xyz'
+    //         }
+    //     },
+    //     layers: [
+    //         {
+    //             id: 'carto-layer',
+    //             type: 'raster',
+    //             source: 'carto-light',
+    //             paint: {'raster-opacity': 1}
+    //         },
+    //         ...(showLayer1 && mapId ? [{
+    //             id: 'historical-layer',
+    //             type: 'raster',
+    //             source: 'historical-map',
+    //             paint: {
+    //                 // MapLibre 需要 0-1 的透明度，前端 Slider 可能是 0-100
+    //                 'raster-opacity': opacity / 100,
+    //                 'raster-fade-duration': 300
+    //             }
+    //         }] : [])
+    //     ]
+    // }), [activeTileUrl, showLayer1, mapId, opacity]);
+
+    // --- 🔥 核心逻辑：构建 DeckGL 图层 ---
+    const deckLayers = useMemo(() => {
+        if (!show3DHeatmap) return [];
+
+        const data = (heatmapData && heatmapData.length > 0) ? heatmapData : searchResults;
+
+        return [
+            new HexagonLayer({
+                id: 'heatmap-3d-layer',
+                data: data,
+                getPosition: d => [d.lng, d.lat],
+
+                // --- 🎨 核心修改：高度计算逻辑 ---
+
+                // 1. 移除 getElevationWeight (不再使用自动累加)
+                // 2. 使用 getElevationValue (手动控制高度算法)
+                getElevationValue: (points) => {
+                    // A. 先算出这个六边形里所有点的总分
+                    const totalScore = points.reduce((sum, p) => sum + (p.score || 1), 0);
+
+                    // B. 使用对数平滑 (Math.log2 或 Math.log10)
+                    // 加 1 是为了防止 log(0) 以及保证最小高度
+                    // 效果：10 -> 3.3 | 100 -> 6.6 | 1000 -> 9.9
+                    // 这样"高的"就被压下来了，"低的"也能看得到了
+                    return Math.log2(totalScore + 1);
+                },
+
+                // --- 物理参数调整 ---
+                radius: 25,
+
+                // 🔥 因为 Log 算出来的值很小 (0~15左右)，所以 Scale 要设大一点
+                elevationScale: 8,
+
+                // 设一个硬上限，防止极个别异常值
+                elevationRange: [0, 400],
+
+                extruded: true,
+                pickable: true,
+
+                // --- 颜色 (保持之前的单色系) ---
+                colorRange: HEATMAP_COLOR_RANGE,
+
+                opacity: 1,
+                coverage: 0.9,
+
+                // 材质光感
+                material: {
+                    ambient: 0.4,
+                    diffuse: 0.8,
+                    shininess: 60,
+                    specularColor: [255, 255, 255]
+                },
+
+                transitions: {
+                    elevationScale: 1000
+                }
+            })
+        ];
+    }, [show3DHeatmap, heatmapData, searchResults]);
 
     return (
         <div className="w-screen h-screen bg-[#f0f0f0]">
@@ -662,47 +910,22 @@ const DynamicMap = ({
                 {...viewState}
                 onMove={evt => setViewState(evt.viewState)}
                 style={{width: '100%', height: '100%'}}
-                mapStyle={mapStyle} // 注入样式
-                mapLib={maplibregl} // 指定使用 maplibre
+                mapStyle={mapStyle}
+                mapLib={maplibregl}
                 minZoom={2}
                 maxZoom={20}
-                // 开启所有交互
-                dragRotate={true}
+                dragRotate={true}       // 允许右键旋转
+                pitchWithRotate={true}  // 允许旋转时改变倾斜
                 touchZoomRotate={true}
             >
-                {/* 导航控件 (右上角) */}
                 <NavigationControl position="top-right" showCompass={true} visualizePitch={true}/>
 
-                {/* --- DeckGL 3D 热力图层 (作为 Overlay) --- */}
-                {show3DHeatmap && (
-                    <DeckGLOverlay
-                        data={heatmapData}
-                        visible={show3DHeatmap}
-                    />
-                )}
+                {/* --- 🔥 1. DeckGL Overlay (3D 热力图) --- */}
+                {/* 只有在开启时才渲染，或者一直挂载但传入空 layers (取决于性能需求) */}
+                <DeckGLOverlay layers={deckLayers}/>
 
-                {/* --- Markers (React Map GL 原生 Marker) --- */}
-                {/*{showLayer2 && searchResults.map((result) => (*/}
-                {/*    <Marker*/}
-                {/*        key={result.id}*/}
-                {/*        longitude={result.lon}*/}
-                {/*        latitude={result.lat}*/}
-                {/*        anchor="bottom" // 锚点在底部*/}
-                {/*        onClick={e => {*/}
-                {/*            // 阻止冒泡，防止点击地图关闭 Popup*/}
-                {/*            e.originalEvent.stopPropagation();*/}
-                {/*            onMarkerClick && onMarkerClick(result);*/}
-                {/*            setSelectedMarker(result);*/}
-                {/*        }}*/}
-                {/*    >*/}
-                {/*        <MuseumPin/>*/}
-                {/*    </Marker>*/}
-                {/*))}*/}
-
-
-                {/* 渲染 Markers */}
+                {/* --- 2. Markers (仅在不显示 3D 热力图时显示，避免混乱) --- */}
                 {showLayer2 && !show3DHeatmap && searchResults.map(res => {
-                    // 判断类型
                     const isDoc = res.fullData?.type === 'document' || res.type === 'document';
                     const isActive = activeLocation?.id === res.id;
 
@@ -713,74 +936,62 @@ const DynamicMap = ({
                             latitude={res.lat}
                             anchor="bottom"
                             onClick={(e) => {
-                                e.originalEvent.stopPropagation(); // 防止点击穿透到底图
+                                e.originalEvent.stopPropagation();
                                 onMarkerClick(res);
+                                setSelectedMarker(res);
                             }}
                         >
                             <div className={`
-                            group cursor-pointer transform transition-all duration-300
-                            ${isActive ? 'scale-125 z-50' : 'hover:scale-110 z-10'}
-                        `}>
+                                group cursor-pointer transform transition-all duration-300
+                                ${isActive ? 'scale-125 z-50' : 'hover:scale-110 z-10'}
+                            `}>
                                 {isDoc ? (
-                                    // --- 文档图标 (金色/橙色) ---
                                     <div className={`
-                                    p-1.5 rounded-full shadow-lg border-2 
-                                    ${isActive ? 'bg-orange-500 border-white' : 'bg-white border-orange-500'}
-                                `}>
-                                        <ScrollText
-                                            size={18}
-                                            className={isActive ? 'text-white' : 'text-orange-600'}
-                                        />
+                                        p-1.5 rounded-full shadow-lg border-2 
+                                        ${isActive ? 'bg-orange-500 border-white' : 'bg-white border-orange-500'}
+                                    `}>
+                                        <ScrollText size={18} className={isActive ? 'text-white' : 'text-orange-600'}/>
                                     </div>
                                 ) : (
-                                    // --- 地图图标 (深蓝色) ---
                                     <div className={`
-                                    p-1.5 rounded-full shadow-lg border-2
-                                    ${isActive ? 'bg-blue-600 border-white' : 'bg-white border-blue-600'}
-                                `}>
-                                        <MapPin
-                                            size={18}
-                                            className={isActive ? 'text-white' : 'text-blue-700'}
-                                        />
+                                        p-1.5 rounded-full shadow-lg border-2
+                                        ${isActive ? 'bg-blue-600 border-white' : 'bg-white border-blue-600'}
+                                    `}>
+                                        <MapPin size={18} className={isActive ? 'text-white' : 'text-blue-700'}/>
                                     </div>
                                 )}
-
-                                {/* 简单的 Tooltip (鼠标悬停显示标题) */}
-                                <div
-                                    className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    {isDoc ? "📜 Document" : "🗺️ Map Tile"}
-                                </div>
                             </div>
                         </Marker>
                     );
                 })}
 
-                {/* --- Popup (弹窗) --- */}
-                {selectedMarker && (
+                {/* --- 3. Popup --- */}
+                {selectedMarker && !show3DHeatmap && (
                     <Popup
                         longitude={selectedMarker.lon}
                         latitude={selectedMarker.lat}
                         anchor="bottom"
-                        offset={40} // 向上偏移避开 Pin
+                        offset={40}
                         onClose={() => setSelectedMarker(null)}
-                        closeButton={false} // 使用自定义样式，不要默认的叉
-                        className="museum-popup" // 可以在 globals.css 自定义样式
+                        closeButton={false}
+                        className="custom-popup"
                     >
-                        {/* 弹窗内容 (完全复用之前的) */}
-                        <div className="flex flex-col gap-3 p-2 font-serif text-deep-ocean w-56">
+                        <div className="flex flex-col gap-3 p-2 font-serif text-slate-800 w-56">
                             <div>
-                                <h3 className="font-bold text-base leading-tight mb-1">{selectedMarker.fullData?.image_source || "Location"}</h3>
+                                <h3 className="font-bold text-base leading-tight mb-1">
+                                    {selectedMarker.fullData?.image_source || "Location"}
+                                </h3>
                                 <div
-                                    className="flex justify-between items-center text-xs text-faded-slate border-t border-border pt-1 mt-1">
+                                    className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-200 pt-1 mt-1">
                                     <span>Score: <span
-                                        className="font-bold text-time-gold">{selectedMarker.score.toFixed(2)}</span></span>
-                                    <span className="font-mono">ID: {selectedMarker.id.substring(0, 4)}</span>
+                                        className="font-bold text-orange-600">{selectedMarker.score?.toFixed(2)}</span></span>
+                                    <span className="font-mono">ID: {selectedMarker.id?.substring(0, 4)}</span>
                                 </div>
                             </div>
                             {selectedMarker.pixel_coords && (
                                 <div className="space-y-1">
                                     <div
-                                        className="relative group rounded-sm overflow-hidden border border-border shadow-sm bg-atlas-paper h-28">
+                                        className="relative group rounded-sm overflow-hidden border border-slate-200 shadow-sm bg-slate-100 h-28">
                                         <div
                                             className="w-full h-full transition-transform duration-500 group-hover:scale-105 filter sepia-[0.1]"
                                             style={{
@@ -796,9 +1007,10 @@ const DynamicMap = ({
                     </Popup>
                 )}
 
-                {/* 逻辑控制器 */}
                 <MapController activeLocation={activeLocation} mapRef={mapRef}/>
             </Map>
+
+            {show3DHeatmap && <HeatmapLegend/>}
         </div>
     );
 };
