@@ -11,10 +11,9 @@ const AVAILABLE_MAPS = [
         id: 'venice_mortier_1704',
         name: 'Venice Cityscape (Mortier Compilation)',
         year: 1704,
-        thumb: '/maps/thumbs/mortier_1704.jpg'
+        thumb: '/maps/raw/sample_venice_map_3.jpg'
     },
-    {id: 'venice_1900', name: '1900 Modern Survey', year: 1900, thumb: '/maps/thumbs/1900.jpg'},
-    {id: 'venice_1729', name: '1729 Ughi Topographical', year: 1729, thumb: '/maps/thumbs/1729.jpg'},
+    {id: 'venice_1900', name: '1900 Modern Survey', year: 1900, thumb: '/maps/thumbs/1900.jpg'}
 ];
 
 export function MapLayerSelector({activeMapId, opacity, onMapChange, onOpacityChange, isOpen, onToggle}) {

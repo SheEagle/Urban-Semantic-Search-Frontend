@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-    title: "Then.",
-    description: "Cartographic Archives Search",
+    title: "City of Water and Ink",
+    description: "Multi-modal semantic search",
 };
 
 export default function RootLayout({children}) {
