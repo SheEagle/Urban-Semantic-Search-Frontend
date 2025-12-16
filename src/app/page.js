@@ -7,9 +7,9 @@ import {ResultsSidebar} from "@/components/Map/ResultsSidebar";
 import {LocationDetailsSheet} from "@/components/Map/LocationDetailsSheet";
 import {TimelineControl} from '@/components/Map/TimelineControl';
 import {MapLayerSelector} from '@/components/Map/MapLayerSelector';
-import {Flame, LocateFixed, Box} from "lucide-react";
+import {LocateFixed, Box} from "lucide-react";
 
-// 动态导入地图组件，禁用 SSR
+// Dynamically import Map component, disabling SSR for Leaflet/MapLibre compatibility
 const MapComponent = dynamic(() => import('@/components/Map/DynamicMap'), {
     ssr: false,
     loading: () => (
@@ -20,7 +20,7 @@ const MapComponent = dynamic(() => import('@/components/Map/DynamicMap'), {
     )
 });
 
-// 胶囊按钮组件
+// Reusable Capsule Button Component
 const ToggleOption = ({active, label, icon: Icon, onClick}) => (
     <button
         onClick={onClick}
@@ -41,44 +41,40 @@ const ToggleOption = ({active, label, icon: Icon, onClick}) => (
 );
 
 export default function Home() {
-    // --- 1. 核心数据状态 ---
-    const [rawSearchResults, setRawSearchResults] = useState([]); // 2D 列表用的详细数据 (Top 50)
-    const [heatmapData, setHeatmapData] = useState([]);           // 3D 视图用的轻量数据 (Top 2000+)
+    // --- 1. Core Data State ---
+    const [rawSearchResults, setRawSearchResults] = useState([]); // Detailed data for 2D list (Top 50)
+    const [heatmapData, setHeatmapData] = useState([]);           // Lightweight data for 3D view (Top 2000+)
     const [isLoading, setIsLoading] = useState(false);
-    const [lastQuery, setLastQuery] = useState("");               // 记录最后一次搜索词
+    const [lastQuery, setLastQuery] = useState("");               // Track last search query
 
-    // --- 2. 交互状态 ---
-    const [activeLocation, setActiveLocation] = useState(null);   // 当前选中的点
-    const [selectedLocation, setSelectedLocation] = useState(null); // 详情页展示的点
+    // --- 2. Interaction State ---
+    const [activeLocation, setActiveLocation] = useState(null);   // Currently highlighted point
+    const [selectedLocation, setSelectedLocation] = useState(null); // Point displayed in details sheet
 
-    // --- 3. 过滤器与图层状态 ---
+    // --- 3. Filters & Layer State ---
     const [yearRange, setYearRange] = useState([1000, 2024]);
-    const [activeMapId, setActiveMapId] = useState(null); // 底图 ID
-    const [opacity, setOpacity] = useState([70]);         // 底图透明度
+    const [activeMapId, setActiveMapId] = useState(null); // Historical map layer ID
+    const [opacity, setOpacity] = useState(0.7);          // Layer opacity (0.0 - 1.0)
 
-    // 开关状态
+    // Toggles
     const [showPins, setShowPins] = useState(true);
-    const [showHeatmap, setShowHeatmap] = useState(false);   // 2D 热力图 (可选)
-    const [show3DHeatmap, setShow3DHeatmap] = useState(false); // 🔥 3D 视图开关
+    const [show3DHeatmap, setShow3DHeatmap] = useState(false);
     const [isMapSelectorOpen, setIsMapSelectorOpen] = useState(false);
 
-
-    // --- 4. 🔥 核心：获取 3D 热力图数据 ---
+    // --- 4. Core: Fetch 3D Heatmap Data ---
     useEffect(() => {
-        // 只有当 3D 开启，且数据为空或者搜索词变了的时候才重新拉取
-        // 这里做一个简单的优化：每次开启 3D 都重新拉取一次以保证数据最新 (因为后端接口很快)
+        // Optimization: Only fetch when 3D is active to save resources
         if (show3DHeatmap) {
             const fetchHeatmap = async () => {
                 try {
-                    // 如果有搜索词，就基于搜索词生成热力图；否则生成全量热力图
                     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-                    let url = `${baseUrl}/search/heatmap-data?limit=3000`; // 获取 3000 个点
+                    let url = `${baseUrl}/search/heatmap-data?limit=3000`; // Fetch 3000 points
 
+                    // If a query exists, generate heatmap based on query context
                     if (lastQuery) {
                         url += `&query=${encodeURIComponent(lastQuery)}`;
                     }
 
-                    console.log("Fetching 3D data from:", url);
                     const res = await fetch(url);
                     const json = await res.json();
 
@@ -92,18 +88,15 @@ export default function Home() {
 
             fetchHeatmap();
         }
-    }, [show3DHeatmap, lastQuery]); // 依赖：开关状态 + 搜索词
+    }, [show3DHeatmap, lastQuery]);
 
-
-    // --- 5. 搜索处理逻辑 (2D 列表) ---
+    // --- 5. Search Logic (2D List) ---
     const handleSearch = async (content, type = 'text') => {
         setIsLoading(true);
-        // 💡 用户开始搜索时，建议暂时关闭 3D 视图，回到列表模式查看详情
+        // UX: Disable 3D view when searching to focus on list results
         if (show3DHeatmap) setShow3DHeatmap(false);
-
         setActiveMapId(null);
 
-        // 更新搜索词记录
         if (type === 'text') setLastQuery(content);
 
         try {
@@ -145,7 +138,7 @@ export default function Home() {
                 }));
                 setRawSearchResults(adaptedResults);
 
-                // 自动选中第一个结果
+                // Auto-select first result
                 if (adaptedResults.length > 0) {
                     setActiveLocation(adaptedResults[0]);
                 }
@@ -161,11 +154,11 @@ export default function Home() {
         }
     };
 
-    // --- 6. 前端时间轴过滤 ---
+    // --- 6. Frontend Timeline Filtering ---
     const filteredResults = useMemo(() => {
         return rawSearchResults.filter(item => {
             const itemYear = item.fullData?.year || item.year;
-            if (!itemYear) return true; // 保留无年份数据
+            if (!itemYear) return true; // Keep items with no year
             const y = parseInt(itemYear);
             if (isNaN(y)) return true;
             return y >= yearRange[0] && y <= yearRange[1];
@@ -175,10 +168,10 @@ export default function Home() {
     return (
         <main className="relative w-screen h-screen overflow-hidden bg-[#f0f0f0]">
 
-            {/* A. 顶部搜索栏 */}
+            {/* A. Top Search Bar */}
             <SearchControl onSearch={handleSearch} isLoading={isLoading}/>
 
-            {/* B. 左侧结果列表 */}
+            {/* B. Left Results Sidebar */}
             <ResultsSidebar
                 results={filteredResults}
                 onSelect={(loc) => {
@@ -186,10 +179,10 @@ export default function Home() {
                     setSelectedLocation(loc);
                 }}
                 activeId={activeLocation?.id}
-                yearRange={yearRange} // 传入 range 以便侧边栏显示状态
+                yearRange={yearRange}
             />
 
-            {/* C. 底部控制坞 (Dock) */}
+            {/* C. Bottom Control Dock */}
             <div
                 className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[1000] w-full flex justify-center pointer-events-none">
                 <div className="
@@ -203,7 +196,7 @@ export default function Home() {
                     flex items-center justify-between gap-4
                     transition-all duration-300 hover:bg-white/95
                 ">
-                    {/* 左侧：时间轴 (Timeline) */}
+                    {/* Left: Timeline Control */}
                     <div
                         className="flex-1 h-full min-w-0 pr-4 mr-2 border-r border-slate-200/60 flex flex-col justify-center">
                         <TimelineControl
@@ -212,9 +205,9 @@ export default function Home() {
                         />
                     </div>
 
-                    {/* 右侧：功能按钮组 */}
+                    {/* Right: Function Buttons */}
                     <div className="flex items-center gap-2 shrink-0">
-                        {/* 1. 地图图层 */}
+                        {/* 1. Map Layer Selector */}
                         <MapLayerSelector
                             activeMapId={activeMapId}
                             opacity={opacity}
@@ -225,7 +218,7 @@ export default function Home() {
                             className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500"
                         />
 
-                        {/* 2. Pins 开关 */}
+                        {/* 2. Toggle Pins */}
                         <ToggleOption
                             active={showPins}
                             label="Pins"
@@ -233,8 +226,7 @@ export default function Home() {
                             onClick={() => setShowPins(!showPins)}
                         />
 
-
-                        {/* 4. 3D View 开关 (核心) */}
+                        {/* 3. Toggle 3D View */}
                         <ToggleOption
                             active={show3DHeatmap}
                             label="3D View"
@@ -245,21 +237,19 @@ export default function Home() {
                 </div>
             </div>
 
-            {/* D. 右侧详情面板 */}
+            {/* D. Details Sheet */}
             <LocationDetailsSheet
                 location={selectedLocation}
                 open={!!selectedLocation}
                 onOpenChange={() => setSelectedLocation(null)}
                 onShowLayer={(mapId) => {
-                    setActiveMapId(mapId); // 激活图层
-                    // 如果需要，这里还可以顺便设置透明度
-                    // setOpacity([80]);
+                    setActiveMapId(mapId); // Activate layer from details
                 }}
             />
 
-            {/* E. 地图主组件 */}
+            {/* E. Main Map Component */}
             <MapComponent
-                // 2D 数据
+                // 2D Data
                 searchResults={filteredResults}
                 activeLocation={activeLocation}
                 onMarkerClick={(loc) => {
@@ -267,13 +257,13 @@ export default function Home() {
                     setSelectedLocation(loc);
                 }}
 
-                // 图层控制
+                // Layer Control
                 mapId={activeMapId}
                 showLayer1={!!activeMapId}
                 showLayer2={showPins}
-                opacity={opacity[0]} // 传入数字 (0-100)
+                opacity={opacity * 100} // Convert 0-1 to 0-100 for MapComponent
 
-                // 3D 数据
+                // 3D Data
                 show3DHeatmap={show3DHeatmap}
                 heatmapData={heatmapData}
             />

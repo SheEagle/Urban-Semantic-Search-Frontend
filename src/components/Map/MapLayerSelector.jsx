@@ -1,19 +1,18 @@
 'use client';
 
-import {Map as MapIcon, Check, Layers} from "lucide-react";
+import {Check, Layers} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Slider} from "@/components/ui/slider";
-import {useState} from "react";
 
-// 预定义的地图列表
+// Pre-defined map list
 const AVAILABLE_MAPS = [
     {
         id: 'venice_mortier_1704',
         name: 'Venice Cityscape (Mortier Compilation)',
         year: 1704,
-        thumb: '/maps/raw/sample_venice_map_3.jpg'
+        thumb: '/maps/raw/venice_map_1.jpg'
     },
-    {id: 'venice_1900', name: '1900 Modern Survey', year: 1900, thumb: '/maps/thumbs/1900.jpg'}
+    {id: 'venice_1675', name: 'Venice 1675', year: 1675, thumb: '/maps/raw/venice_map_2.png'}
 ];
 
 export function MapLayerSelector({activeMapId, opacity, onMapChange, onOpacityChange, isOpen, onToggle}) {
@@ -46,7 +45,7 @@ export function MapLayerSelector({activeMapId, opacity, onMapChange, onOpacityCh
                             className="text-[10px] text-time-gold font-mono">{Math.round(opacity * 100)}% OPACITY</span>
                     </h4>
 
-                    {/* 透明度滑块移动到这里 */}
+                    {/* Opacity Slider */}
                     <Slider
                         value={[opacity * 100]}
                         max={100}
@@ -55,10 +54,10 @@ export function MapLayerSelector({activeMapId, opacity, onMapChange, onOpacityCh
                         className="py-2"
                     />
 
-                    {/* 地图列表 */}
+                    {/* Map List */}
                     <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar">
                         <button
-                            onClick={() => onMapChange(null)} // 关闭
+                            onClick={() => onMapChange(null)} // Close / Reset
                             className={`flex items-center gap-3 p-2 rounded-md border text-left transition-colors ${!activeMapId ? 'bg-slate-100 border-slate-300' : 'hover:bg-slate-50 border-transparent'}`}
                         >
                             <div
@@ -73,9 +72,8 @@ export function MapLayerSelector({activeMapId, opacity, onMapChange, onOpacityCh
                                 onClick={() => onMapChange(map.id)}
                                 className={`flex items-center gap-3 p-2 rounded-md border text-left transition-all ${activeMapId === map.id ? 'bg-deep-ocean/5 border-time-gold ring-1 ring-time-gold/30' : 'bg-white border-border hover:border-deep-ocean/30'}`}
                             >
-                                {/* 缩略图占位 */}
+                                {/* Thumbnail Placeholder */}
                                 <div className="w-10 h-10 rounded bg-slate-200 shrink-0 overflow-hidden relative">
-                                    {/* <img src={map.thumb} ... /> */}
                                     <div className="absolute inset-0 bg-deep-ocean/10"></div>
                                     {activeMapId === map.id && (
                                         <div
@@ -97,7 +95,7 @@ export function MapLayerSelector({activeMapId, opacity, onMapChange, onOpacityCh
     );
 }
 
-// 简单的辅助图标
+// Simple helper icon
 const XIcon = ({size}) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
          strokeLinecap="round" strokeLinejoin="round">

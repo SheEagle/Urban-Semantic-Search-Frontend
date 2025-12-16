@@ -12,7 +12,7 @@ export function SearchControl({onSearch, isLoading}) {
     const [query, setQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
 
-    // 过滤器状态
+    // Filter state
     const [filters, setFilters] = useState({
         year_start: '',
         year_end: '',
@@ -21,7 +21,7 @@ export function SearchControl({onSearch, isLoading}) {
 
     const fileInputRef = useRef(null);
 
-    // 提交文本搜索
+    // Handle text search submission
     const handleSubmit = (e) => {
         e.preventDefault();
         if (query.trim()) {
@@ -29,17 +29,17 @@ export function SearchControl({onSearch, isLoading}) {
         }
     };
 
-    // 清除输入
+    // Clear input
     const handleClear = () => {
         setQuery('');
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    // 处理图片选择
+    // Handle image selection
     const handleFileChange = (e) => {
         const file = e.target.files?.[0];
         if (file) {
-            onSearch(file, 'image', filters); // 触发图片搜索
+            onSearch(file, 'image', filters); // Trigger image search
             setQuery(`📄 Image: ${file.name}`);
         }
     };
@@ -48,7 +48,7 @@ export function SearchControl({onSearch, isLoading}) {
         fileInputRef.current?.click();
     };
 
-    // 检查过滤器是否激活（用于高亮按钮）
+    // Check if any filters are active (for styling highlights)
     const isFilterActive = filters.year_start || filters.year_end || filters.map_source;
 
     return (
@@ -59,12 +59,12 @@ export function SearchControl({onSearch, isLoading}) {
             `}>
                 <form onSubmit={handleSubmit} className="flex items-center bg-atlas-paper rounded-full pr-1">
 
-                    {/* 左侧图标 */}
+                    {/* Left Icon */}
                     <div className="pl-4 pr-2 text-deep-ocean/60">
                         <Compass className={`h-5 w-5 ${isLoading ? 'animate-spin-slow' : ''}`} strokeWidth={1.5}/>
                     </div>
 
-                    {/* 文本输入框 */}
+                    {/* Text Input */}
                     <Input
                         type="text"
                         placeholder="Search places, coordinates..."
@@ -76,7 +76,7 @@ export function SearchControl({onSearch, isLoading}) {
                         disabled={isLoading}
                     />
 
-                    {/* 隐藏的文件输入 */}
+                    {/* Hidden File Input */}
                     <input
                         type="file"
                         accept="image/*"
@@ -85,10 +85,10 @@ export function SearchControl({onSearch, isLoading}) {
                         className="hidden"
                     />
 
-                    {/* 右侧操作区 */}
+                    {/* Right Action Area */}
                     <div className="flex items-center gap-1 pr-1">
 
-                        {/* 清除按钮 */}
+                        {/* Clear Button */}
                         {query && !isLoading && (
                             <button type="button" onClick={handleClear}
                                     className="p-2 text-faded-slate hover:text-red-500 transition-colors">
@@ -96,7 +96,7 @@ export function SearchControl({onSearch, isLoading}) {
                             </button>
                         )}
 
-                        {/* 图片上传按钮 (仅当无文本时显示) */}
+                        {/* Image Upload Button (only visible when text is empty) */}
                         {!query && !isLoading && (
                             <button
                                 type="button"
@@ -108,10 +108,10 @@ export function SearchControl({onSearch, isLoading}) {
                             </button>
                         )}
 
-                        {/* 分隔线 */}
+                        {/* Divider */}
                         <div className="h-4 w-px bg-slate-200 mx-1"></div>
 
-                        {/* ⚙️ 高级过滤器 Popover */}
+                        {/* Advanced Filters Popover */}
                         <Popover>
                             <PopoverTrigger asChild>
                                 <button
@@ -137,29 +137,7 @@ export function SearchControl({onSearch, isLoading}) {
                                         )}
                                     </h4>
 
-                                    {/*/!* 1. 地图来源 *!/*/}
-                                    {/*<div className="space-y-2">*/}
-                                    {/*    <Label className="text-xs text-faded-slate uppercase font-bold tracking-wider">Source*/}
-                                    {/*        Map</Label>*/}
-                                    {/*    <Select*/}
-                                    {/*        value={filters.map_source}*/}
-                                    {/*        onValueChange={(val) => setFilters({*/}
-                                    {/*            ...filters,*/}
-                                    {/*            map_source: val === 'all' ? '' : val*/}
-                                    {/*        })}*/}
-                                    {/*    >*/}
-                                    {/*        <SelectTrigger*/}
-                                    {/*            className="h-9 text-xs bg-white/50 border-border focus:ring-time-gold/30">*/}
-                                    {/*            <SelectValue placeholder="All Chronicles"/>*/}
-                                    {/*        </SelectTrigger>*/}
-                                    {/*        <SelectContent>*/}
-                                    {/*            <SelectItem value="all">All Chronicles</SelectItem>*/}
-                                    {/*            <SelectItem value="map1">Venice 1846 (Austrian)</SelectItem>*/}
-                                    {/*            <SelectItem value="map2">Venice 1900 (Modern)</SelectItem>*/}
-                                    {/*        </SelectContent>*/}
-                                    {/*    </Select>*/}
-                                    {/*</div>*/}
-
+                                    {/* 1. Map Source */}
                                     <div className="space-y-2">
                                         <Label className="text-xs text-faded-slate uppercase font-bold tracking-wider">Source
                                             Map</Label>
@@ -175,8 +153,7 @@ export function SearchControl({onSearch, isLoading}) {
                                                 <SelectValue placeholder="All Chronicles"/>
                                             </SelectTrigger>
 
-                                            {/* 👇👇👇 关键修改：添加 z-[2002] 👇👇👇 */}
-                                            {/* Popover 的 z-index 是 1001，所以这里的 z-index 必须比它高 */}
+                                            {/* Note: High z-index is required here to layer above the PopoverContent */}
                                             <SelectContent className="z-[2002]">
                                                 <SelectItem value="all">All Chronicles</SelectItem>
                                                 <SelectItem value="map1">Venice 1846 (Austrian)</SelectItem>
@@ -185,7 +162,7 @@ export function SearchControl({onSearch, isLoading}) {
                                         </Select>
                                     </div>
 
-                                    {/* 2. 年份范围 */}
+                                    {/* 2. Temporal Range */}
                                     <div className="space-y-2">
                                         <Label className="text-xs text-faded-slate uppercase font-bold tracking-wider">Temporal
                                             Range</Label>
@@ -222,7 +199,7 @@ export function SearchControl({onSearch, isLoading}) {
                                         </div>
                                     </div>
 
-                                    {/* 底部操作 */}
+                                    {/* Footer Actions */}
                                     <div className="pt-2 flex justify-between items-center">
                                         <button
                                             type="button"
@@ -240,7 +217,7 @@ export function SearchControl({onSearch, isLoading}) {
                             </PopoverContent>
                         </Popover>
 
-                        {/* 搜索按钮 */}
+                        {/* Search Button */}
                         <button
                             type="submit"
                             disabled={!query.trim() || isLoading}

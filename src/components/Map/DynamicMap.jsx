@@ -1,28 +1,30 @@
 'use client';
 
 import {useState, useEffect, useRef, useMemo} from 'react';
-import Map, {Marker, Popup, NavigationControl} from 'react-map-gl/maplibre';
+import Map, {Marker, NavigationControl} from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {ScrollText, MapPin} from "lucide-react";
 
-// 🔥 引入 DeckGL 相关
+// Import DeckGL dependencies
 import DeckGLOverlay from './DeckGLOverlay';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
-// --- 1. 定义多地图源 URL ---
+
+// --- 1. Define Map Source URLs ---
 const MAP_SOURCES = {
     'venice_1846': '/maps/web_tiles_1/{z}/{x}/{y}.png',
+    'venice_1675': '/maps/web_tiles_2/{z}/{x}/{y}.png',
     'default': '/maps/web_tiles_1/{z}/{x}/{y}.png'
 };
 
-// --- 2. 动画控制器 ---
+// --- 2. Animation Controller ---
 const MapController = ({activeLocation, mapRef}) => {
     useEffect(() => {
         if (activeLocation && mapRef.current) {
             mapRef.current.flyTo({
                 center: [activeLocation.lon, activeLocation.lat],
                 zoom: 16,
-                pitch: 50, // 飞向目标时也保持倾斜
+                pitch: 50, // Maintain pitch when flying to target
                 bearing: 0,
                 duration: 2000,
                 essential: true
@@ -32,30 +34,20 @@ const MapController = ({activeLocation, mapRef}) => {
     return null;
 };
 
-// 🎨 修改 1: 定义新色系 (暖色系: 浅黄 -> 橙 -> 深红)
-// 这种单色系渐变看起来更像"数据可视化"，而不是"霓虹灯"
-// const HEATMAP_COLOR_RANGE = [
-//     [255, 255, 212], // 极浅黄 (Low)
-//     [254, 217, 142], // 浅橙
-//     [254, 153, 41],  // 橙
-//     [217, 95, 14],   // 深橙
-//     [153, 52, 4]     // 褐红 (High)
-// ];
-
-// 🎨 修改: 极致单色系 (Monochromatic Orange)
-// 这种风格非常像建筑模型，干净、高级
+// Monochromatic Orange Color Scale
+// Creates a clean, architectural model aesthetic rather than a neon look
 const HEATMAP_COLOR_RANGE = [
-    [255, 247, 237], // 极浅 (几乎透明)
+    [255, 247, 237], // Very light (almost transparent)
     [254, 232, 200],
     [253, 212, 158],
     [253, 187, 132],
     [252, 141, 89],
     [239, 101, 72],
     [215, 48, 31],
-    [153, 0, 0]      // 极深 (最热)
+    [153, 0, 0]      // Very dark (hottest)
 ];
 
-// 图例组件 (自动适配上面的颜色)
+// Legend component (automatically adapts to the color range above)
 const HeatmapLegend = () => {
     const gradient = `linear-gradient(to right, ${
         HEATMAP_COLOR_RANGE.map(c => `rgb(${c.join(',')})`).join(',')
@@ -65,14 +57,13 @@ const HeatmapLegend = () => {
         <div
             className="absolute bottom-32 right-4 bg-white/90 backdrop-blur-md px-4 py-3 rounded-xl shadow-xl border border-white/50 z-[400] w-48 animate-in fade-in slide-in-from-right-8 duration-700">
             <div className="flex items-center gap-2 mb-2">
-                {/* 小圆点换成深橙色 */}
                 <div className="w-2 h-2 rounded-full bg-[#ef6548] animate-pulse"></div>
                 <span className="text-[10px] font-bold text-slate-800 uppercase tracking-widest">
                     Intensity
                 </span>
             </div>
 
-            {/* 渐变条 */}
+            {/* Gradient Bar */}
             <div className="h-2 w-full rounded-full shadow-inner mb-1" style={{background: gradient}}/>
 
             <div className="flex justify-between text-[9px] text-slate-400 font-mono font-medium">
@@ -83,14 +74,17 @@ const HeatmapLegend = () => {
     );
 };
 
-
-// --- 3. 主组件 ---
+// --- 3. Main Component ---
 const DynamicMap = ({
                         searchResults,
-                        showLayer1, showLayer2, showLayer3, opacity = 70, // 1. 给一个默认值 70 (0-100 scale),
-                        activeLocation, onMarkerClick, mapId,
-                        // 3D 热力图相关 props
-                        show3DHeatmap, heatmapData
+                        showLayer1, showLayer2, showLayer3,
+                        opacity = 70, // Default value 70 (0-100 scale)
+                        activeLocation,
+                        onMarkerClick,
+                        mapId,
+                        // 3D Heatmap props
+                        show3DHeatmap,
+                        heatmapData
                     }) => {
     const mapRef = useRef(null);
     const [viewState, setViewState] = useState({
@@ -103,38 +97,23 @@ const DynamicMap = ({
 
     const [selectedMarker, setSelectedMarker] = useState(null);
     const activeTileUrl = MAP_SOURCES[mapId] || MAP_SOURCES['default'];
-    const fullMapUrl = "/maps/raw/sample_venice_map_3.jpg";
 
-    // --- 🔥 核心逻辑：自动倾斜视角 (Auto Tilt) ---
-    // 当切换 3D 模式时，自动调整视角 pitch
+    // --- Core Logic: Auto Tilt ---
+    // Automatically adjust pitch when toggling 3D mode
     useEffect(() => {
         const map = mapRef.current?.getMap();
         if (map) {
             if (show3DHeatmap) {
-                // 开启 3D：倾斜 50 度，稍微旋转一点角度更有立体感
+                // Enable 3D: Tilt to 50 degrees, slight rotation for better 3D depth
                 map.easeTo({pitch: 50, bearing: 10, duration: 1000});
             } else {
-                // 关闭 3D：恢复俯视
+                // Disable 3D: Restore top-down view
                 map.easeTo({pitch: 0, bearing: 0, duration: 1000});
             }
         }
     }, [show3DHeatmap]);
 
-    // const safeOpacity = useMemo(() => {
-    //     let val = opacity;
-    //     // 如果意外传入了数组 [70]
-    //     if (Array.isArray(val)) val = val[0];
-    //     // 确保是数字
-    //     val = Number(val);
-    //     // 如果是 NaN，回退到 70
-    //     if (isNaN(val)) val = 70;
-    //     // 限制范围 0-100
-    //     val = Math.min(100, Math.max(0, val));
-    //
-    //     return val / 100; // 转为 MapLibre 需要的 0.0 - 1.0
-    // }, [opacity]);
-
-    // 1. 计算 safeOpacity (保持原样)
+    // Calculate safe opacity (0.0 - 1.0)
     const safeOpacity = useMemo(() => {
         let val = opacity;
         if (Array.isArray(val)) val = val[0];
@@ -144,51 +123,16 @@ const DynamicMap = ({
         return val / 100;
     }, [opacity]);
 
-    // 🔥【新增】: 专门用于实时更新透明度的 Effect
-    // 这比更新整个 mapStyle 更快、更流畅，且不会导致瓦片重载
+    // Effect specifically for real-time opacity updates
+    // This is more performant than updating the entire mapStyle object as it prevents tile reloading
     useEffect(() => {
         const map = mapRef.current?.getMap();
-        // 确保地图已加载且图层存在
+        // Ensure map is loaded and layer exists
         if (map && map.getLayer('historical-layer')) {
             map.setPaintProperty('historical-layer', 'raster-opacity', safeOpacity);
         }
-    }, [safeOpacity, mapRef]); // 只要 safeOpacity 变了，就执行
+    }, [safeOpacity, mapRef]);
 
-    // const mapStyle = useMemo(() => ({
-    //     version: 8,
-    //     sources: {
-    //         'carto-light': {
-    //             type: 'raster',
-    //             tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
-    //             tileSize: 256,
-    //             attribution: '&copy; CartoDB'
-    //         },
-    //         'historical-map': {
-    //             type: 'raster',
-    //             tiles: [activeTileUrl],
-    //             tileSize: 256,
-    //             scheme: 'xyz'
-    //         }
-    //     },
-    //     layers: [
-    //         {
-    //             id: 'carto-layer',
-    //             type: 'raster',
-    //             source: 'carto-light',
-    //             paint: {'raster-opacity': 1}
-    //         },
-    //         // 🔥 修复点 2: 只有当 mapId 存在且 showLayer1 为 true 时才渲染
-    //         ...(showLayer1 && mapId ? [{
-    //             id: 'historical-layer',
-    //             type: 'raster',
-    //             source: 'historical-map',
-    //             paint: {
-    //                 'raster-opacity': safeOpacity, // 使用计算好的安全透明度
-    //                 'raster-fade-duration': 100     // 减少过渡时间，让调节更跟手
-    //             }
-    //         }] : [])
-    //     ]
-    // }), [activeTileUrl, showLayer1, mapId, safeOpacity]); // 依赖 safeOpacity
     const mapStyle = useMemo(() => ({
         version: 8,
         sources: {
@@ -212,61 +156,22 @@ const DynamicMap = ({
                 source: 'carto-light',
                 paint: {'raster-opacity': 1}
             },
-            // 历史地图层
+            // Historical Map Layer
             ...(showLayer1 && mapId ? [{
                 id: 'historical-layer',
                 type: 'raster',
                 source: 'historical-map',
                 paint: {
-                    // 这里虽然写了 safeOpacity，但实际上由上面的 useEffect 接管控制
-                    // 初始渲染用 safeOpacity，后续更新用 setPaintProperty
+                    // Initial render uses safeOpacity, subsequent updates use setPaintProperty
                     'raster-opacity': safeOpacity,
-                    'raster-fade-duration': 0 // 设为 0 可以让滑动更跟手
+                    'raster-fade-duration': 0 // Set to 0 for responsive sliding
                 }
             }] : [])
         ]
-        // 🔥【关键修改】: 下面的依赖数组里去掉了 safeOpacity
-        // 这样拖动滑块时，mapStyle 对象不会变，就不会触发重绘，只触发上面的 setPaintProperty
+        // Critical: safeOpacity is excluded from dependencies to prevent full style re-computation during slider interaction
     }), [activeTileUrl, showLayer1, mapId]);
 
-
-    // const mapStyle = useMemo(() => ({
-    //     version: 8,
-    //     sources: {
-    //         'carto-light': {
-    //             type: 'raster',
-    //             tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'],
-    //             tileSize: 256,
-    //             attribution: '&copy; CartoDB'
-    //         },
-    //         'historical-map': {
-    //             type: 'raster',
-    //             tiles: [activeTileUrl],
-    //             tileSize: 256,
-    //             scheme: 'xyz'
-    //         }
-    //     },
-    //     layers: [
-    //         {
-    //             id: 'carto-layer',
-    //             type: 'raster',
-    //             source: 'carto-light',
-    //             paint: {'raster-opacity': 1}
-    //         },
-    //         ...(showLayer1 && mapId ? [{
-    //             id: 'historical-layer',
-    //             type: 'raster',
-    //             source: 'historical-map',
-    //             paint: {
-    //                 // MapLibre 需要 0-1 的透明度，前端 Slider 可能是 0-100
-    //                 'raster-opacity': opacity / 100,
-    //                 'raster-fade-duration': 300
-    //             }
-    //         }] : [])
-    //     ]
-    // }), [activeTileUrl, showLayer1, mapId, opacity]);
-
-    // --- 🔥 核心逻辑：构建 DeckGL 图层 ---
+    // --- Core Logic: Construct DeckGL Layers ---
     const deckLayers = useMemo(() => {
         if (!show3DHeatmap) return [];
 
@@ -278,40 +183,34 @@ const DynamicMap = ({
                 data: data,
                 getPosition: d => [d.lng, d.lat],
 
-                // --- 🎨 核心修改：高度计算逻辑 ---
+                // --- Height Calculation Logic ---
 
-                // 1. 移除 getElevationWeight (不再使用自动累加)
-                // 2. 使用 getElevationValue (手动控制高度算法)
+                // Use getElevationValue to manually control height algorithm
                 getElevationValue: (points) => {
-                    // A. 先算出这个六边形里所有点的总分
+                    // A. Calculate total score for all points in this hexagon
                     const totalScore = points.reduce((sum, p) => sum + (p.score || 1), 0);
 
-                    // B. 使用对数平滑 (Math.log2 或 Math.log10)
-                    // 加 1 是为了防止 log(0) 以及保证最小高度
-                    // 效果：10 -> 3.3 | 100 -> 6.6 | 1000 -> 9.9
-                    // 这样"高的"就被压下来了，"低的"也能看得到了
+                    // B. Use logarithmic smoothing (Math.log2)
+                    // Adding 1 prevents log(0) and ensures minimum height.
+                    // This compresses high values so lower values remain visible.
                     return Math.log2(totalScore + 1);
                 },
 
-                // --- 物理参数调整 ---
+                // --- Physical Parameters ---
                 radius: 25,
-
-                // 🔥 因为 Log 算出来的值很小 (0~15左右)，所以 Scale 要设大一点
+                // Since log values are small (0~15), use a larger scale
                 elevationScale: 8,
-
-                // 设一个硬上限，防止极个别异常值
+                // Hard cap to prevent extreme outliers
                 elevationRange: [0, 400],
 
                 extruded: true,
                 pickable: true,
 
-                // --- 颜色 (保持之前的单色系) ---
+                // --- Color & Material ---
                 colorRange: HEATMAP_COLOR_RANGE,
-
                 opacity: 1,
                 coverage: 0.9,
 
-                // 材质光感
                 material: {
                     ambient: 0.4,
                     diffuse: 0.8,
@@ -337,17 +236,16 @@ const DynamicMap = ({
                 mapLib={maplibregl}
                 minZoom={2}
                 maxZoom={20}
-                dragRotate={true}       // 允许右键旋转
-                pitchWithRotate={true}  // 允许旋转时改变倾斜
+                dragRotate={true}       // Allow rotation
+                pitchWithRotate={true}  // Allow pitch change during rotation
                 touchZoomRotate={true}
             >
                 <NavigationControl position="top-right" showCompass={true} visualizePitch={true}/>
 
-                {/* --- 🔥 1. DeckGL Overlay (3D 热力图) --- */}
-                {/* 只有在开启时才渲染，或者一直挂载但传入空 layers (取决于性能需求) */}
+                {/* --- 1. DeckGL Overlay (3D Heatmap) --- */}
                 <DeckGLOverlay layers={deckLayers}/>
 
-                {/* --- 2. Markers (仅在不显示 3D 热力图时显示，避免混乱) --- */}
+                {/* --- 2. Markers (Only shown when 3D Heatmap is off) --- */}
                 {showLayer2 && !show3DHeatmap && searchResults.map(res => {
                     const isDoc = res.fullData?.type === 'document' || res.type === 'document';
                     const isActive = activeLocation?.id === res.id;
@@ -387,48 +285,6 @@ const DynamicMap = ({
                         </Marker>
                     );
                 })}
-
-                {/*/!* --- 3. Popup --- *!/*/}
-                {/*{selectedMarker && !show3DHeatmap && (*/}
-                {/*    <Popup*/}
-                {/*        longitude={selectedMarker.lon}*/}
-                {/*        latitude={selectedMarker.lat}*/}
-                {/*        anchor="bottom"*/}
-                {/*        offset={40}*/}
-                {/*        onClose={() => setSelectedMarker(null)}*/}
-                {/*        closeButton={false}*/}
-                {/*        className="custom-popup"*/}
-                {/*    >*/}
-                {/*        <div className="flex flex-col gap-3 p-2 font-serif text-slate-800 w-56">*/}
-                {/*            <div>*/}
-                {/*                <h3 className="font-bold text-base leading-tight mb-1">*/}
-                {/*                    {selectedMarker.fullData?.image_source || "Location"}*/}
-                {/*                </h3>*/}
-                {/*                <div*/}
-                {/*                    className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-200 pt-1 mt-1">*/}
-                {/*                    <span>Score: <span*/}
-                {/*                        className="font-bold text-orange-600">{selectedMarker.score?.toFixed(2)}</span></span>*/}
-                {/*                    <span className="font-mono">ID: {selectedMarker.id?.substring(0, 4)}</span>*/}
-                {/*                </div>*/}
-                {/*            </div>*/}
-                {/*            {selectedMarker.pixel_coords && (*/}
-                {/*                <div className="space-y-1">*/}
-                {/*                    <div*/}
-                {/*                        className="relative group rounded-sm overflow-hidden border border-slate-200 shadow-sm bg-slate-100 h-28">*/}
-                {/*                        <div*/}
-                {/*                            className="w-full h-full transition-transform duration-500 group-hover:scale-105 filter sepia-[0.1]"*/}
-                {/*                            style={{*/}
-                {/*                                backgroundRepeat: 'no-repeat',*/}
-                {/*                                backgroundImage: `url(${fullMapUrl})`,*/}
-                {/*                                backgroundPosition: `-${selectedMarker.pixel_coords[0]}px -${selectedMarker.pixel_coords[1]}px`,*/}
-                {/*                            }}*/}
-                {/*                        />*/}
-                {/*                    </div>*/}
-                {/*                </div>*/}
-                {/*            )}*/}
-                {/*        </div>*/}
-                {/*    </Popup>*/}
-                {/*)}*/}
 
                 <MapController activeLocation={activeLocation} mapRef={mapRef}/>
             </Map>
